@@ -1,7 +1,7 @@
 const React = require("react");
-module.exports = function Login() {
+module.exports = function Login(props) {
   return (
-    <form action="/login" method="POST">
+    <form action="/login" method="POST" id="form_id" onSubmit={props._onSubmit}>
       <div>
         <label htmlFor="email">Email:</label>
         <input
@@ -16,7 +16,14 @@ module.exports = function Login() {
         <label htmlFor="password">Password:</label>
         <input type="password" id="password" name="password" required />
       </div>
-      <button type="submit">Submit</button>
+
+      <div>
+        <label htmlFor="official">Login as School Official</label>
+        <input type="checkbox" id="official" name="official" value="isOn" />
+      </div>
+      <button type="submit" onClick={props._onClick}>
+        Submit
+      </button>
     </form>
   );
 };

@@ -2,11 +2,14 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const mongoose = require("mongoose");
-const connEvents = require("./connection-listeners");
+const passport = require("passport");
 const ObjectID = require("mongodb").ObjectID;
+
+const connEvents = require("./connection-listeners");
+
 const colors = require("colors");
 const routes = require("./routes");
-const cookies = require("./cookies");
+const auth = require("./auth");
 
 connEvents(mongoose, colors);
 
@@ -30,7 +33,10 @@ mongoose.connect(
         username: { type: String, required: true },
         password: { type: String, required: true },
         schoolUrl: { type: String, required: true },
-        officials: [],
+        people: {
+          officials: [],
+          students: []
+        },
         courses: [],
         layout: {}
       });
@@ -53,8 +59,8 @@ mongoose.connect(
       app.use(express.static(__dirname + "/dist"));
       app.use(express.urlencoded({ extended: false }));
 
-      routes(app, modelSchool);
-      //cookies(app, modelSchool);
+      auth(app, passport, modelSchool);
+      routes(app, passport, modelSchool);
 
       const port = process.env.PORT;
 

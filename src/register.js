@@ -68,10 +68,10 @@ module.exports = class Register extends React.Component {
       e.preventDefault();
       alert("Passwords does not match.");
       domPw.focus();
+    } else {
+      const conf = confirm("Procees with this school name? \n" + domSch);
+      !conf && e.preventDefault();
     }
-
-    const conf = confirm("Procees with this school name? \n" + domSch);
-    !conf && e.preventDefault();
   }
   render() {
     const errorDom = document.getElementById("errorDom");

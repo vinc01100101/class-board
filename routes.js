@@ -1,7 +1,16 @@
 const indexPug = __dirname + "/dist/index.pug";
 const bcrypt = require("bcryptjs");
+const { v4: uuidv4 } = require("uuid");
 
-module.exports = (app, modelSchool) => {
+module.exports = (app, passport, modelSchool) => {
+  app.get("/f", (req, res, next) => {
+    res.send("FAILED");
+  });
+
+  app.get("/s", (req, res, next) => {
+    res.send("SUCCESS");
+  });
+
   app.get("/", (req, res) => {
     req.query.page && req.query.page != "homepage"
       ? res.render(indexPug, {
@@ -62,21 +71,26 @@ module.exports = (app, modelSchool) => {
         });
       } else {
         const hash = bcrypt.hashSync(req.body.password, 12);
+        const uuid = uuidv4().toString();
         const documentSchool = new modelSchool({
           username: req.body.username,
           password: hash,
           schoolUrl: req.body["school-name"].toLowerCase().replace(/\s/g, "_"),
           ownerFirstName: req.body["first-name"],
           ownerLastName: req.body["last-name"],
-          officials: [
-            {
-              firstName: req.body["first-name"],
-              lastName: req.body["last-name"],
-              position: "President",
-              username: req.body.username,
-              password: hash
-            }
-          ],
+          people: {
+            officials: [
+              {
+                id: "officials-" + uuid,
+                firstName: req.body["first-name"],
+                lastName: req.body["last-name"],
+                position: "President",
+                username: req.body.username,
+                password: hash
+              }
+            ],
+            students: []
+          },
           courses: [],
           layout: {
             schoolName: req.body["school-name"]
@@ -98,5 +112,11 @@ module.exports = (app, modelSchool) => {
     });
   });
 
-  app.post("/login", (req, res) => {});
+  app.post(
+    "/login",
+    passport.authenticate("local", {
+      failureRedirect: "/f",
+      successRedirect: "/s"
+    })
+  );
 };
