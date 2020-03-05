@@ -1,15 +1,11 @@
 const indexPug = __dirname + "/dist/index.pug";
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const flash = require("connect-flash");
 
 module.exports = (app, passport, modelSchool) => {
-  app.get("/f", (req, res, next) => {
-    res.send("FAILED");
-  });
+  app.use(flash());
 
-  app.get("/s", (req, res, next) => {
-    res.send("SUCCESS");
-  });
   function dbSearchSchool(sch, done) {
     modelSchool.findOne({ schoolUrl: sch }, (err, doc) => {
       if (err) {
@@ -22,14 +18,13 @@ module.exports = (app, passport, modelSchool) => {
 
   //for Query Url
   app.get("/", (req, res) => {
-    console.log(req.query.page);
+    console.log("QUERY URL: " + req.query.page);
     switch (req.query.page) {
       case "homepage":
       case undefined:
         if (req.isAuthenticated()) {
           res.redirect("/?page=profile");
         } else {
-          console.log("Getting homepage");
           modelSchool
             .find({ schoolUrl: /./ })
             .select("layout")
@@ -67,11 +62,15 @@ module.exports = (app, passport, modelSchool) => {
 
   app.post(
     "/login",
-    passport.authenticate("local", {
-      failureRedirect: "/f"
-    }),
+    (req, res, next) => {
+      const sch = req.body.username.split(".");
+      passport.authenticate("local", {
+        failureRedirect: "/" + sch[sch.length - 1],
+        failureFlash: true
+      })(req, res, next);
+    },
     (req, res) => {
-      console.log("success");
+      console.log("SSSSSSSSSSUUUUUUUUUUUUCCCCCCCCCCCCCEEEEEEEEEESSSSSSSsss");
       res.redirect("/?page=profile");
     }
   );
@@ -92,7 +91,8 @@ module.exports = (app, passport, modelSchool) => {
         } else {
           res.render(indexPug, {
             currentPage: "schoolhomepage",
-            schoolPageLayout: JSON.stringify(doc.layout)
+            schoolPageLayout: JSON.stringify(doc.layout),
+            errorDom: req.flash("error")
           });
         }
       });
@@ -164,7 +164,7 @@ module.exports = (app, passport, modelSchool) => {
 
   app.get("/api/logout", (req, res, next) => {
     console.log("LOGGING OUT " + JSON.stringify(req.user));
-    const sch = req.user.schoolUrl;
+    const sch = req.user ? req.user.schoolUrl : null;
     req.logout();
     res.redirect(sch ? "/" + sch : "/");
   });

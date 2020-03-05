@@ -45,19 +45,16 @@ module.exports = (app, passport, modelSchool) => {
   });
   passport.use(
     new LocalStrategy((username, password, done) => {
-      console.log("LOCAL STRAT");
-      console.log(username);
+      console.log("LOCAL STRATEGY");
       const sch = username.split(".");
       const usr = [...sch];
       usr.splice(sch.length - 1, sch.length);
       usr.join("");
-      console.log("USER: " + usr);
       modelSchool
         .findOne({ schoolUrl: sch[sch.length - 1] })
         .select("people")
         .exec((err, doc) => {
           if (doc) {
-            console.log(doc);
             const user =
               doc.people.officials.filter(x => x.username == usr) ||
               doc.people.students.filter(x => x.username == usr);
@@ -67,11 +64,11 @@ module.exports = (app, passport, modelSchool) => {
                 done(null, user[0]);
               } else {
                 console.log("Wrong password");
-                done(null, false);
+                done(null, false, { message: "Wrong password" });
               }
             } else {
               console.log("Username does not exist");
-              return done(null, false);
+              return done(null, false, { message: "Username does not exist" });
             }
           } else {
             console.log("No School Found As Linked To The Email");

@@ -46,7 +46,8 @@ mongoose.connect(
       //-------------------------------
       app.use((req, res, next) => {
         console.log(
-          "METHOD: " +
+          "_____________________" +
+            "\nMETHOD: " +
             req.method +
             "\nPATH: " +
             req.path +

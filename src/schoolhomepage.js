@@ -17,13 +17,15 @@ module.exports = class SchoolHomePage extends React.Component {
     const schoolPageLayout = JSON.parse(
       document.getElementById("schoolPageLayout").textContent
     );
-    const errorDom = document.getElementById("errorDom").value;
+    const errorDom = document.getElementById("errorDom").textContent;
     return (
       <div>
         <h1>YOUR SCHOOL HOME PAGE</h1>
         <h2>Welcome to {schoolPageLayout.schoolName}</h2>
         <p style={{ color: "red" }}>{errorDom}</p>
         <Login _onSubmit={this._onSubmit} />
+
+        <a href="/">Back</a>
       </div>
     );
   }
