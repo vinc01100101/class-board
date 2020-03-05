@@ -1,0 +1,19 @@
+#register {
+  color: blue;
+}
+#login {
+  color: red;
+}
+
+.tabcontent {
+  display: none;
+}
+
+#currentPage,
+#errorDom,
+#successDom {
+  visibility: hidden;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
