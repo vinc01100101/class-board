@@ -19,25 +19,17 @@ module.exports = (app, passport, modelSchool) => {
       }
     });
   }
-  function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-      console.log("AUTHENTICATED");
-      next();
-    } else {
-      console.log("NOT AUTHENTICATED");
-      res.redirect("/");
-    }
-  }
+
   //for Query Url
   app.get("/", (req, res) => {
-    req.query.page && req.query.page != ("homepage" || "proile")
-      ? res.render(indexPug, {
-          currentPage: req.query.page
-        })
-      : req.query.page == "profile"
-      ? ensureAuthenticated()
-      : (() => {
-          //if homepage, get the list of school names
+    console.log(req.query.page);
+    switch (req.query.page) {
+      case "homepage":
+      case undefined:
+        if (req.isAuthenticated()) {
+          res.redirect("/?page=profile");
+        } else {
+          console.log("Getting homepage");
           modelSchool
             .find({ schoolUrl: /./ })
             .select("layout")
@@ -47,36 +39,64 @@ module.exports = (app, passport, modelSchool) => {
                 schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });
             });
-        })();
+        }
+
+        break;
+
+      case "profile":
+        if (req.isAuthenticated()) {
+          res.render(indexPug, {
+            currentPage: "profile"
+          });
+        } else {
+          res.redirect("/");
+        }
+        break;
+
+      case "register":
+        if (req.isAuthenticated()) {
+          res.redirect("/?page=profile");
+        } else {
+          res.render(indexPug, {
+            currentPage: "register"
+          });
+        }
+        break;
+    }
   });
 
   app.post(
     "/login",
     passport.authenticate("local", {
-      failureRedirect: "/f",
-      successRedirect: "/?page=profile"
-    })
+      failureRedirect: "/f"
+    }),
+    (req, res) => {
+      console.log("success");
+      res.redirect("/?page=profile");
+    }
   );
-  // app.get("/?page=profile", ensureAuthenticated, (req, res) => {
-  //   console.log("RENDERING PROFILE");
-  //   res.render(indexPug, { currentPage: "profile" });
-  // });
 
   //for School URL Params
   app.get("/:schparams", (req, res) => {
-    dbSearchSchool(req.params.schparams, (err, doc) => {
-      if (err) {
-        console.log("Search error.");
-        res.status("500").send("Database Error: " + err);
-      } else if (!doc) {
-        res.send("School not registered.");
-      } else {
-        res.render(indexPug, {
-          currentPage: "schoolhomepage",
-          schoolPageLayout: JSON.stringify(doc.layout)
-        });
-      }
-    });
+    if (req.isAuthenticated()) {
+      res.render(indexPug, {
+        currentPage: "profile"
+      });
+    } else {
+      dbSearchSchool(req.params.schparams, (err, doc) => {
+        if (err) {
+          console.log("Search error.");
+          res.status("500").send("Database Error: " + err);
+        } else if (!doc) {
+          res.send("School not registered.");
+        } else {
+          res.render(indexPug, {
+            currentPage: "schoolhomepage",
+            schoolPageLayout: JSON.stringify(doc.layout)
+          });
+        }
+      });
+    }
   });
 
   app.post("/schoolfromselect", (req, res) => {

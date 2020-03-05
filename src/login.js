@@ -27,9 +27,7 @@ module.exports = function Login(props) {
         <label htmlFor="official">Login as School Official</label>
         <input type="checkbox" id="official" name="official" value="isOn" />
       </div>
-      <button type="submit" onClick={props._onClick}>
-        Submit
-      </button>
+      <button type="submit">Submit</button>
     </form>
   );
 };
