@@ -3,11 +3,17 @@ module.exports = function Login(props) {
   return (
     <form action="/login" method="POST" id="form_id" onSubmit={props._onSubmit}>
       <div>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          style={{ display: "none" }}
+        />
         <label htmlFor="email">Email:</label>
         <input
           type="email"
           id="email"
-          name="username"
+          name="email"
           placeholder="Email Address"
           required
         />

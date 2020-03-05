@@ -10,13 +10,34 @@ module.exports = (app, passport, modelSchool) => {
   app.get("/s", (req, res, next) => {
     res.send("SUCCESS");
   });
-
+  function dbSearchSchool(sch, done) {
+    modelSchool.findOne({ schoolUrl: sch }, (err, doc) => {
+      if (err) {
+        done(err);
+      } else {
+        done(null, doc);
+      }
+    });
+  }
+  function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+      console.log("AUTHENTICATED");
+      next();
+    } else {
+      console.log("NOT AUTHENTICATED");
+      res.redirect("/");
+    }
+  }
+  //for Query Url
   app.get("/", (req, res) => {
-    req.query.page && req.query.page != "homepage"
+    req.query.page && req.query.page != ("homepage" || "proile")
       ? res.render(indexPug, {
           currentPage: req.query.page
         })
+      : req.query.page == "profile"
+      ? ensureAuthenticated()
       : (() => {
+          //if homepage, get the list of school names
           modelSchool
             .find({ schoolUrl: /./ })
             .select("layout")
@@ -28,15 +49,20 @@ module.exports = (app, passport, modelSchool) => {
             });
         })();
   });
-  function dbSearchSchool(sch, done) {
-    modelSchool.findOne({ schoolUrl: sch }, (err, doc) => {
-      if (err) {
-        done(err);
-      } else {
-        done(null, doc);
-      }
-    });
-  }
+
+  app.post(
+    "/login",
+    passport.authenticate("local", {
+      failureRedirect: "/f",
+      successRedirect: "/?page=profile"
+    })
+  );
+  // app.get("/?page=profile", ensureAuthenticated, (req, res) => {
+  //   console.log("RENDERING PROFILE");
+  //   res.render(indexPug, { currentPage: "profile" });
+  // });
+
+  //for School URL Params
   app.get("/:schparams", (req, res) => {
     dbSearchSchool(req.params.schparams, (err, doc) => {
       if (err) {
@@ -72,10 +98,13 @@ module.exports = (app, passport, modelSchool) => {
       } else {
         const hash = bcrypt.hashSync(req.body.password, 12);
         const uuid = uuidv4().toString();
+        const schurl = req.body["school-name"]
+          .toLowerCase()
+          .replace(/\s/g, "_");
         const documentSchool = new modelSchool({
           username: req.body.username,
           password: hash,
-          schoolUrl: req.body["school-name"].toLowerCase().replace(/\s/g, "_"),
+          schoolUrl: schurl,
           ownerFirstName: req.body["first-name"],
           ownerLastName: req.body["last-name"],
           people: {
@@ -86,7 +115,8 @@ module.exports = (app, passport, modelSchool) => {
                 lastName: req.body["last-name"],
                 position: "President",
                 username: req.body.username,
-                password: hash
+                password: hash,
+                schoolUrl: schurl
               }
             ],
             students: []
@@ -112,11 +142,10 @@ module.exports = (app, passport, modelSchool) => {
     });
   });
 
-  app.post(
-    "/login",
-    passport.authenticate("local", {
-      failureRedirect: "/f",
-      successRedirect: "/s"
-    })
-  );
+  app.get("/api/logout", (req, res, next) => {
+    console.log("LOGGING OUT " + JSON.stringify(req.user));
+    const sch = req.user.schoolUrl;
+    req.logout();
+    res.redirect(sch ? "/" + sch : "/");
+  });
 };

@@ -13,14 +13,15 @@ module.exports = (app, passport, modelSchool) => {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  passport.serializeUser((user, done) =>
-    done(null, { id: user.id, school: user.schoolUrl })
-  );
+  passport.serializeUser((user, done) => {
+    console.log("SERIALIZING: " + JSON.stringify(user));
+    done(null, { id: user.id, school: user.schoolUrl });
+  });
 
   passport.deserializeUser((obj, done) => {
-    console.log("DESERIALIZING: " + JSON.stringify(obj));
+    console.log("DESERIALIZING: " + JSON.stringify(obj) + "__");
     modelSchool
-      .findOne(obj.school)
+      .findOne({ schoolUrl: obj.school })
       .select("people")
       .exec((err, doc) => {
         if (err) {
@@ -33,11 +34,11 @@ module.exports = (app, passport, modelSchool) => {
           const user =
             doc.people.officials.filter(x => x.id == obj.id) ||
             doc.people.students.filter(x => x.id == obj.id);
-          if (!user) {
+          if (!user[0]) {
             console.log("No Cookie For Doc");
             done(null, false);
           } else {
-            done(null, user);
+            done(null, user[0]);
           }
         }
       });
@@ -63,7 +64,7 @@ module.exports = (app, passport, modelSchool) => {
 
             if (user[0]) {
               if (bcrypt.compareSync(password, user[0].password)) {
-                done(null, user);
+                done(null, user[0]);
               } else {
                 console.log("Wrong password");
                 done(null, false);

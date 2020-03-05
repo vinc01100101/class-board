@@ -10,8 +10,9 @@ module.exports = class SchoolHomePage extends React.Component {
   _onSubmit(e) {
     const schUrl = window.location.href.split("/");
     const sch = schUrl[schUrl.length - 1];
-    dom = document.getElementById("email");
-    dom.value += "." + sch;
+    const domUsr = document.getElementById("username");
+    const domEmail = document.getElementById("email");
+    domUsr.value = domEmail.value + "." + sch;
   }
   _onClick() {
     console.log("CLICKED");
