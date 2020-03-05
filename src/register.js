@@ -63,12 +63,15 @@ module.exports = class Register extends React.Component {
   _handleOnSubmit(e) {
     const domPw = document.getElementById("password");
     const domCPw = document.getElementById("confirm-password");
-
+    const domSch = document.getElementById("school-name").value;
     if (domPw.value != domCPw.value) {
       e.preventDefault();
       alert("Passwords does not match.");
       domPw.focus();
     }
+
+    const conf = confirm("Procees with this school name? \n" + domSch);
+    !conf && e.preventDefault();
   }
   render() {
     const errorDom = document.getElementById("errorDom");

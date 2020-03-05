@@ -6,6 +6,7 @@ const connEvents = require("./connection-listeners");
 const ObjectID = require("mongodb").ObjectID;
 const colors = require("colors");
 const routes = require("./routes");
+const cookies = require("./cookies");
 
 connEvents(mongoose, colors);
 
@@ -28,7 +29,7 @@ mongoose.connect(
         ownerLastName: { type: String, required: true },
         username: { type: String, required: true },
         password: { type: String, required: true },
-        schoolName: { type: String, required: true },
+        schoolUrl: { type: String, required: true },
         officials: [],
         courses: [],
         layout: {}
@@ -53,6 +54,7 @@ mongoose.connect(
       app.use(express.urlencoded({ extended: false }));
 
       routes(app, modelSchool);
+      //cookies(app, modelSchool);
 
       const port = process.env.PORT;
 

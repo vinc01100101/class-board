@@ -9,18 +9,18 @@ module.exports = (app, modelSchool) => {
         })
       : (() => {
           modelSchool
-            .find({ schoolName: /./ })
-            .select("schoolName")
+            .find({ schoolUrl: /./ })
+            .select("layout")
             .exec((err, doc) => {
               res.render(indexPug, {
                 currentPage: "homepage",
-                schools: JSON.stringify(doc.map(x => x.schoolName))
+                schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });
             });
         })();
   });
   function dbSearchSchool(sch, done) {
-    modelSchool.findOne({ schoolName: sch }, (err, doc) => {
+    modelSchool.findOne({ schoolUrl: sch }, (err, doc) => {
       if (err) {
         done(err);
       } else {
@@ -43,23 +43,15 @@ module.exports = (app, modelSchool) => {
       }
     });
   });
+
   app.post("/schoolfromselect", (req, res) => {
-    dbSearchSchool(req.body["school-name"], (err, doc) => {
-      if (err) {
-        console.log("Search error.");
-        res.status("500").send("Database Error: " + err);
-      } else if (!doc) {
-        res.send("School not registered.");
-      } else {
-        res.render(indexPug, {
-          currentPage: "schoolhomepage",
-          schoolPageLayout: JSON.stringify(doc.layout)
-        });
-      }
-    });
+    res.redirect(
+      "/" + req.body["school-name"].toLowerCase().replace(/\s/g, "_")
+    );
   });
+
   app.post("/register-master", (req, res) => {
-    modelSchool.findOne({ schoolName: req.body["school-name"] }, (err, doc) => {
+    dbSearchSchool(req.body["school-name"], (err, doc) => {
       if (err) {
         console.log("Db 'findOne' Error: " + err);
         res.status("500").send("Server error 500");
@@ -73,10 +65,18 @@ module.exports = (app, modelSchool) => {
         const documentSchool = new modelSchool({
           username: req.body.username,
           password: hash,
-          schoolName: req.body["school-name"],
+          schoolUrl: req.body["school-name"].toLowerCase().replace(/\s/g, "_"),
           ownerFirstName: req.body["first-name"],
           ownerLastName: req.body["last-name"],
-          officials: [],
+          officials: [
+            {
+              firstName: req.body["first-name"],
+              lastName: req.body["last-name"],
+              position: "President",
+              username: req.body.username,
+              password: hash
+            }
+          ],
           courses: [],
           layout: {
             schoolName: req.body["school-name"]
@@ -97,4 +97,6 @@ module.exports = (app, modelSchool) => {
       }
     });
   });
+
+  app.post("/login", (req, res) => {});
 };
