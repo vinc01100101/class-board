@@ -11,7 +11,7 @@ module.exports = class HomePage extends React.Component {
 
         <p>Navigate to your school using this url format: </p>
         <p>
-          http://localhost:8080/
+          <span style={{ color: "purple" }}>https://classboard.com/</span>
           <span style={{ color: "red" }}>school_name</span>
         </p>
         <br />

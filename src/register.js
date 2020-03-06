@@ -66,7 +66,7 @@ module.exports = class Register extends React.Component {
     const domSch = document.getElementById("school-name").value;
     if (domPw.value != domCPw.value) {
       e.preventDefault();
-      alert("Passwords does not match.");
+      alert("Passwords don't match.");
       domPw.focus();
     } else {
       const conf = confirm("Procees with this school name? \n" + domSch);

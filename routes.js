@@ -106,7 +106,8 @@ module.exports = (app, passport, modelSchool) => {
   });
 
   app.post("/register-master", (req, res) => {
-    dbSearchSchool(req.body["school-name"], (err, doc) => {
+    const schurl = req.body["school-name"].toLowerCase().replace(/\s/g, "_");
+    dbSearchSchool(schurl, (err, doc) => {
       if (err) {
         console.log("Db 'findOne' Error: " + err);
         res.status("500").send("Server error 500");
