@@ -3,7 +3,7 @@ const app = express();
 require("dotenv").config();
 const mongoose = require("mongoose");
 const passport = require("passport");
-const ObjectID = require("mongodb").ObjectID;
+//const ObjectID = require("mongodb").ObjectID;
 
 const connEvents = require("./connection-listeners");
 
@@ -21,7 +21,6 @@ mongoose.connect(
   (err, db) => {
     if (err) {
       console.log("DATABASE ERROR: " + err);
-      res.status("500").send("Server Db Error.");
     } else {
       //-------------------------------
 
@@ -56,6 +55,7 @@ mongoose.connect(
         );
         next();
       });
+
       app.set("view engine", "pug");
       app.use(express.static(__dirname + "/dist"));
       app.use(express.urlencoded({ extended: false }));

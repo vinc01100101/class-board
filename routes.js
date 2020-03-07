@@ -41,7 +41,8 @@ module.exports = (app, passport, modelSchool) => {
       case "profile":
         if (req.isAuthenticated()) {
           res.render(indexPug, {
-            currentPage: "profile"
+            currentPage: "profile",
+            userProfile: JSON.stringify(req.user)
           });
         } else {
           res.redirect("/");
@@ -57,6 +58,9 @@ module.exports = (app, passport, modelSchool) => {
           });
         }
         break;
+
+      default:
+        res.send("Page Not Found.");
     }
   });
 

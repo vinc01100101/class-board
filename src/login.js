@@ -23,10 +23,6 @@ module.exports = function Login(props) {
         <input type="password" id="password" name="password" required />
       </div>
 
-      <div>
-        <label htmlFor="official">Login as School Official</label>
-        <input type="checkbox" id="official" name="official" value="isOn" />
-      </div>
       <button type="submit">Submit</button>
     </form>
   );
