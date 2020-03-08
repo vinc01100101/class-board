@@ -19,6 +19,19 @@ module.exports = (app, passport, modelSchool) => {
   //for Query Url
   app.get("/", (req, res) => {
     console.log("QUERY URL: " + req.query.page);
+    const isOfficial = req.user && req.user.id.split("-")[0] == "officials";
+    const member = req.user && req.user.id.split("-")[0];
+    const uPToSend =
+      req.user &&
+      JSON.stringify({
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        member: member,
+        position: req.user.position,
+        schoolName: req.user.schoolName,
+        permissions: req.user.permissions
+      });
+    console.log(member);
     switch (req.query.page) {
       case "homepage":
       case undefined:
@@ -42,7 +55,7 @@ module.exports = (app, passport, modelSchool) => {
         if (req.isAuthenticated()) {
           res.render(indexPug, {
             currentPage: "profile",
-            userProfile: JSON.stringify(req.user)
+            userProfile: uPToSend
           });
         } else {
           res.redirect("/");
@@ -57,6 +70,102 @@ module.exports = (app, passport, modelSchool) => {
             currentPage: "register"
           });
         }
+        break;
+
+      case "control-panel":
+        if (req.isAuthenticated()) {
+          if (isOfficial) {
+            res.render(indexPug, {
+              currentPage: "control-panel",
+              userProfile: uPToSend
+            });
+          } else {
+            res.send("Students cannot access this page :D");
+          }
+        } else {
+          res.send("You must log in first as an administrator");
+        }
+        break;
+
+      case "create-admin":
+        if (req.isAuthenticated()) {
+          if (req.user.position == ("President" || "Vice-President")) {
+            res.render(indexPug, {
+              currentPage: "create-admin",
+              userProfile: uPToSend
+            });
+          } else {
+            res.send("No permission to access this page");
+          }
+        } else {
+          res.send("You must log in first as an administrator");
+        }
+        break;
+
+      case "manage-schedules":
+        if (req.isAuthenticated()) {
+          if (req.user.permissions.manageSchedule) {
+            res.render(indexPug, {
+              currentPage: "manage-schedules",
+              userProfile: uPToSend
+            });
+          } else {
+            res.send("No permission to access this page");
+          }
+        } else {
+          res.send("You must log in first as an administrator");
+        }
+        break;
+
+      case "manage-students-payment":
+        if (req.isAuthenticated()) {
+          if (req.user.permissions.manageStudentsPayment) {
+            res.render(indexPug, {
+              currentPage: "manage-students-payment",
+              userProfile: uPToSend
+            });
+          } else {
+            res.send("No permission to access this page");
+          }
+        } else {
+          res.send("You must log in first as an administrator");
+        }
+        break;
+
+      case "welcome-new-admin":
+        modelSchool.findOne(
+          { schoolUrl: req.query["school-url"] },
+          (err, doc) => {
+            if (err) {
+              console.log("Database error upon accessing welcome-new-admin");
+              res.send("Database Error");
+            } else if (!doc) {
+              console.log("School url does not exist");
+              res.send("No Permission to access this page: err-sch-!exst");
+            } else {
+              let ind = -1;
+              const usr = doc.people.officials.filter(x => {
+                return (
+                  x.username == req.query.user &&
+                  x.password == req.query.chocolate
+                );
+              })[0];
+
+              if (!usr) {
+                res.send("No Permission to access this page: err-usr-!exst");
+              } else {
+                res.render(indexPug, {
+                  currentPage: "welcome-new-admin",
+                  userProfile: JSON.stringify({
+                    username: req.query.user,
+                    schoolUrl: req.query["school-url"]
+                  })
+                });
+              }
+            }
+          }
+        );
+
         break;
 
       default:
@@ -74,11 +183,42 @@ module.exports = (app, passport, modelSchool) => {
       })(req, res, next);
     },
     (req, res) => {
-      console.log("SSSSSSSSSSUUUUUUUUUUUUCCCCCCCCCCCCCEEEEEEEEEESSSSSSSsss");
       res.redirect("/?page=profile");
     }
   );
+  app.post("/ticket", (req, res) => {
+    let input = req.body["school-ticket"].split(".");
+    const sch = input.splice(-1)[0];
+    const ticket = input.join(".");
+    modelSchool.findOne({ schoolUrl: sch }, (err, doc) => {
+      if (err) {
+        console.log("Database Error");
+        res.send("Server Database Error");
+      } else if (!doc) {
+        console.log("Unexpected error: School url not found in the database");
+        res.send("Unexpected error: School not found");
+      } else {
+        const usr = doc.people.officials.filter(x => x.password == ticket)[0];
 
+        if (!usr) {
+          res.render(indexPug, {
+            currentPage: "schoolhomepage",
+            schoolPageLayout: JSON.stringify(doc.layout),
+            errorDom: "Invalid Ticket"
+          });
+        } else {
+          res.redirect(
+            "/?page=welcome-new-admin&user=" +
+              usr.username +
+              "&school-url=" +
+              usr.schoolUrl +
+              "&chocolate=" +
+              ticket
+          );
+        }
+      }
+    });
+  });
   //for School URL Params
   app.get("/:schparams", (req, res) => {
     if (req.isAuthenticated()) {
@@ -118,7 +258,7 @@ module.exports = (app, passport, modelSchool) => {
       } else if (doc) {
         res.render(indexPug, {
           currentPage: "register",
-          errorDom: "School Name already exist."
+          errorDom: `School name "${req.body["school-name"]}" already exist`
         });
       } else {
         const hash = bcrypt.hashSync(req.body.password, 12);
@@ -141,14 +281,20 @@ module.exports = (app, passport, modelSchool) => {
                 position: "President",
                 username: req.body.username,
                 password: hash,
-                schoolUrl: schurl
+                schoolUrl: schurl,
+                schoolName: req.body["school-name"],
+                permissions: {
+                  manageSchedule: true,
+                  manageStudentsPayment: true
+                }
               }
             ],
             students: []
           },
           courses: [],
           layout: {
-            schoolName: req.body["school-name"]
+            schoolName: req.body["school-name"],
+            schoolUrl: schurl
           }
         });
         documentSchool.save((err, doc) => {
@@ -167,6 +313,76 @@ module.exports = (app, passport, modelSchool) => {
     });
   });
 
+  app.post("/register-admin", (req, res) => {
+    modelSchool
+      .findOne({ schoolUrl: req.user.schoolUrl })
+      .select("people")
+      .exec((err, doc) => {
+        if (err) {
+          console.log("Database Error: " + err);
+          res.send("DATABASE ERROR");
+        } else if (!doc) {
+          console.log("Unexpected error: School name doesn't exist");
+          res.send("Server error");
+        } else {
+          const isExisting = doc.people.officials.filter(
+            x => x.username == req.body.username
+          )[0];
+          console.log("IS EXISTING?: " + isExisting);
+          if (isExisting) {
+            console.log("Email already exists.");
+            res.render(indexPug, {
+              currentPage: "create-admin",
+              errorDom: "Email already exists."
+            });
+          } else {
+            const ticket = uuidv4();
+            doc.people.officials.push({
+              id: "officials-" + ticket,
+              firstName: req.body["first-name"],
+              lastName: req.body["last-name"],
+              position: req.body.position,
+              username: req.body.username,
+              password: ticket,
+              schoolUrl: req.user.schoolUrl,
+              schoolName: req.user.schoolName,
+              permissions: {
+                manageSchedule: !!req.body.sched,
+                manageStudentsPayment: !!req.body.payment
+              }
+            });
+            modelSchool.findOneAndUpdate(
+              { schoolUrl: req.user.schoolUrl },
+              doc,
+              (err, done) => {
+                if (err) {
+                  console.log("Error on findOneAndUpdate: " + err);
+                  res.send("Server Database Error");
+                } else {
+                  console.log(done);
+                  const ticketString =
+                    "<h4>Ticket code for " +
+                    req.body["first-name"] +
+                    " " +
+                    req.body["last-name"] +
+                    " has been generated" +
+                    "<br>Please keep this somewhere safe." +
+                    "<br>This can only be used once.<br><br>" +
+                    req.body.username +
+                    "|" +
+                    req.body.position +
+                    "<br>" +
+                    ticket +
+                    "</h4>";
+
+                  res.send(ticketString);
+                }
+              }
+            );
+          }
+        }
+      });
+  });
   app.get("/api/logout", (req, res, next) => {
     console.log("LOGGING OUT " + JSON.stringify(req.user));
     const sch = req.user ? req.user.schoolUrl : null;

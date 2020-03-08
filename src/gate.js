@@ -2,6 +2,12 @@ const Register = require("./register");
 const HomePage = require("./homepage");
 const SchoolHomePage = require("./schoolhomepage");
 const Profile = require("./profile");
+const ControlPanel = require("./admin-control-panel");
+const CreateAdminAccount = require("./cp/create-admin");
+const ManageSchedules = require("./cp/manage-schedules");
+const ManageStudentsPayment = require("./cp/manage-students-payment");
+const WelcomeNewAdmin = require("./cp/welcome-new-admin");
+
 const ReactDOM = require("react-dom");
 const React = require("react");
 
@@ -11,20 +17,38 @@ const root = document.getElementById("root");
 let ToRender;
 switch (currPage.textContent) {
   case "register":
-    ToRender = Register;
+    ToRender = Register();
     break;
   case "homepage":
-    ToRender = HomePage;
+    ToRender = HomePage();
     break;
   case "schoolhomepage":
-    console.log("schoolhomepage");
-    ToRender = SchoolHomePage;
+    ToRender = SchoolHomePage();
     break;
   case "profile":
-    console.log("PROFILE");
-    ToRender = Profile;
+    ToRender = Profile();
+    break;
+  //Control Panel Section --------------------
+  case "control-panel":
+    ToRender = ControlPanel();
     break;
 
+  case "create-admin":
+    ToRender = CreateAdminAccount();
+    break;
+
+  case "manage-schedules":
+    ToRender = ManageSchedules();
+    break;
+
+  case "manage-students-payments":
+    ToRender = ManageStudentsPayment();
+    break;
+
+  case "welcome-new-admin":
+    ToRender = WelcomeNewAdmin();
+    break;
+  //------------------------------------------
   default:
     root.textContent = "No Page Were Set In This Query :(";
 }

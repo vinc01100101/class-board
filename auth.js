@@ -47,9 +47,9 @@ module.exports = (app, passport, modelSchool) => {
     new LocalStrategy((username, password, done) => {
       console.log("LOCAL STRATEGY");
       const sch = username.split(".");
-      const usr = [...sch];
-      usr.splice(sch.length - 1, sch.length);
-      usr.join("");
+      let usr = [...sch];
+      usr.splice(-1);
+      usr = usr.join(".");
       modelSchool
         .findOne({ schoolUrl: sch[sch.length - 1] })
         .select("people")

@@ -1,27 +1,42 @@
 const React = require("react");
+module.exports = () => {
+  const userProfile = JSON.parse(
+    document.getElementById("userProfile").textContent
+  );
 
-module.exports = class Profile extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+  return class Profile extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        show: true
+      };
 
-  render() {
-    const errorDom = document.getElementById("errorDom").textContent;
+      this._showStdPayments = this._showStdPayments.bind(this);
+    }
+    _showStdPayments() {}
+    render() {
+      const errorDom = document.getElementById("errorDom").textContent;
+
+      const isOfficial = userProfile.member == "officials";
+      return (
+        <div>
+          <h1>HEY PROFILE</h1>
+          <p style={{ color: "red" }}>{errorDom}</p>
+          <BasicInfo />
+          {isOfficial && <a href="/?page=control-panel">Control Panel</a>}
+          <a href="/api/logout">Logout</a>
+        </div>
+      );
+    }
+  };
+
+  function BasicInfo(props) {
     return (
       <div>
-        <h1>HEY PROFILE</h1>
-        <p style={{ color: "red" }}>{errorDom}</p>
-        <UserInfo />
-        <a href="/api/logout">Logout</a>
+        <h1>{userProfile.schoolName}</h1>
+        <p>{userProfile.firstName + " " + userProfile.lastName}</p>
+        <p>{userProfile.position}</p>
       </div>
     );
   }
 };
-
-function UserInfo(props) {
-  return (
-    <div>
-      <h1>USER INFO</h1>
-    </div>
-  );
-}
