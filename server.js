@@ -61,7 +61,7 @@ mongoose.connect(
       app.use(express.urlencoded({ extended: false }));
 
       auth(app, passport, modelSchool);
-      routes(app, passport, modelSchool);
+      routes(app, passport, modelSchool, db);
 
       const port = process.env.PORT;
 

@@ -35,12 +35,11 @@ module.exports = () => {
       const successDom = document.getElementById("successDom");
       return (
         <div>
-          <h3>End-User Agreement</h3>
-          <p>
-            Agreement agreement lorem ipsum blah blah blah blah blah blah blah
-            blah blah blah blah blah...
-          </p>
-          <label htmlFor="agree">Agree and register</label>
+          <h3>End-User License Agreement</h3>
+          <p>Agreement agreement lorem ipsum blah blah...</p>
+          <label htmlFor="agree">
+            <span style={{ fontWeight: "bold" }}>Agree and register</span>
+          </label>
           <input
             id="agree"
             type="checkbox"

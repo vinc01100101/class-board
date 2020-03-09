@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const flash = require("connect-flash");
 
-module.exports = (app, passport, modelSchool) => {
+module.exports = (app, passport, modelSchool, db) => {
   app.use(flash());
 
   function dbSearchSchool(sch, done) {
@@ -147,7 +147,8 @@ module.exports = (app, passport, modelSchool) => {
               const usr = doc.people.officials.filter(x => {
                 return (
                   x.username == req.query.user &&
-                  x.password == req.query.chocolate
+                  x.password == req.query.chocolate &&
+                  x.id == req.query.vanilla
                 );
               })[0];
 
@@ -236,7 +237,7 @@ module.exports = (app, passport, modelSchool) => {
         res.send("Unexpected error: err-sch-!exst");
       } else {
         let ind = -1;
-        const usr = doc.people[member].filter((x, i) => {
+        doc.people[member].filter((x, i) => {
           if (x.id == req.body.id && x.username == req.body.username) {
             if (isATicket) {
               if (x.password == req.body["o-password"]) {
@@ -252,10 +253,7 @@ module.exports = (app, passport, modelSchool) => {
           }
           return false;
         })[0];
-        console.log("USER: " + usr);
-        console.log("INDEX: " + ind);
-        console.log("MEMBER: " + member);
-        console.log("MEMBERS LIST: " + JSON.stringify(doc.people[member]));
+
         if (ind >= 0) {
           doc.people[member][ind].password = bcrypt.hashSync(
             req.body["n-password"],
@@ -324,7 +322,7 @@ module.exports = (app, passport, modelSchool) => {
         });
       } else {
         const hash = bcrypt.hashSync(req.body.password, 12);
-        const uuid = uuidv4().toString();
+        const uuid = uuidv4();
         const schurl = req.body["school-name"]
           .toLowerCase()
           .replace(/\s/g, "_");
@@ -376,6 +374,7 @@ module.exports = (app, passport, modelSchool) => {
   });
 
   app.post("/register-admin", (req, res) => {
+    const uuid = uuidv4();
     modelSchool
       .findOne({ schoolUrl: req.user.schoolUrl })
       .select("people")
@@ -400,7 +399,7 @@ module.exports = (app, passport, modelSchool) => {
           } else {
             const ticket = "ticket-" + uuidv4();
             doc.people.officials.push({
-              id: "officials-" + ticket,
+              id: "officials-" + uuid,
               firstName: req.body["first-name"],
               lastName: req.body["last-name"],
               position: req.body.position,
@@ -450,5 +449,17 @@ module.exports = (app, passport, modelSchool) => {
     const sch = req.user ? req.user.schoolUrl : null;
     req.logout();
     res.redirect(sch ? "/" + sch : "/");
+  });
+
+  app.get("/api/drop-collection", (req, res) => {
+    db.collectionNames("schools", (err, name) => {
+      console.log(names);
+    });
+    db.collection("schools").drop((err, delOK) => {
+      if (err) console.log(err);
+      if (delOK) console.log("Collection Deleted.");
+
+      res.redirect("/");
+    });
   });
 };

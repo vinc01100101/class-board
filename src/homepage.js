@@ -34,6 +34,7 @@ module.exports = () => {
             Your school isn't registered yet? Join us!{" "}
             <a href="/?page=register">Here's How.</a>
           </p>
+          <a href="/api/drop-collection">Delete Collections From Database</a>
         </div>
       );
     }
