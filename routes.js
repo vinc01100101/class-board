@@ -158,7 +158,9 @@ module.exports = (app, passport, modelSchool) => {
                   currentPage: "welcome-new-admin",
                   userProfile: JSON.stringify({
                     username: req.query.user,
-                    schoolUrl: req.query["school-url"]
+                    id: req.query.vanilla,
+                    schoolUrl: req.query["school-url"],
+                    chocolate: req.query.chocolate
                   })
                 });
               }
@@ -213,8 +215,68 @@ module.exports = (app, passport, modelSchool) => {
               "&school-url=" +
               usr.schoolUrl +
               "&chocolate=" +
-              ticket
+              ticket +
+              "&vanilla=" +
+              usr.id
           );
+        }
+      }
+    });
+  });
+  app.post("/update-password", (req, res) => {
+    const member = req.body.id.split("-")[0];
+    const isATicket = req.body["o-password"].split("-")[0] == "ticket";
+    const schurl = req.body["school-url"];
+    modelSchool.findOne({ schoolUrl: schurl }, (err, doc) => {
+      if (err) {
+        console.log("route /update-password: find-error");
+        res.send("Server Database Error");
+      } else if (!doc) {
+        console.log("route /update-password: School not found");
+        res.send("Unexpected error: err-sch-!exst");
+      } else {
+        let ind = -1;
+        const usr = doc.people[member].filter((x, i) => {
+          if (x.id == req.body.id && x.username == req.body.username) {
+            if (isATicket) {
+              if (x.password == req.body["o-password"]) {
+                ind = i;
+                return true;
+              }
+            } else {
+              if (bcrypt.compareSync(req.body["o-password"], x.password)) {
+                ind = i;
+                return true;
+              }
+            }
+          }
+          return false;
+        })[0];
+        console.log("USER: " + usr);
+        console.log("INDEX: " + ind);
+        console.log("MEMBER: " + member);
+        console.log("MEMBERS LIST: " + JSON.stringify(doc.people[member]));
+        if (ind >= 0) {
+          doc.people[member][ind].password = bcrypt.hashSync(
+            req.body["n-password"],
+            12
+          );
+          modelSchool.findOneAndUpdate(
+            { schoolUrl: schurl },
+            doc,
+            (err, result) => {
+              if (err) {
+                console.log("findOneAndUpdate error");
+                res.send("Server Database Error");
+              } else if (!result) {
+                res.send("Failed To Change Password");
+              } else {
+                res.send("Change Password Successful");
+              }
+            }
+          );
+        } else {
+          res.send("Change Password Failed");
         }
       }
     });
@@ -336,7 +398,7 @@ module.exports = (app, passport, modelSchool) => {
               errorDom: "Email already exists."
             });
           } else {
-            const ticket = uuidv4();
+            const ticket = "ticket-" + uuidv4();
             doc.people.officials.push({
               id: "officials-" + ticket,
               firstName: req.body["first-name"],

@@ -16,12 +16,15 @@ module.exports = () => {
     _showStdPayments() {}
     render() {
       const errorDom = document.getElementById("errorDom").textContent;
+      const successDom = document.getElementById("successDom").textContent;
 
       const isOfficial = userProfile.member == "officials";
       return (
         <div>
           <h1>HEY PROFILE</h1>
           <p style={{ color: "red" }}>{errorDom}</p>
+          <p style={{ color: "green" }}>{successDom}</p>
+
           <BasicInfo />
           {isOfficial && <a href="/?page=control-panel">Control Panel</a>}
           <a href="/api/logout">Logout</a>
