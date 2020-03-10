@@ -40,6 +40,13 @@ module.exports = () => {
               Manage Students Payment
             </button>
           )}
+          <button
+            onClick={() => {
+              window.location.href = "/?page=view-and-manage-admins";
+            }}
+          >
+            View And Manage Admins
+          </button>
           <br />
         </div>
       );

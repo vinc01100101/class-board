@@ -7,6 +7,7 @@ const CreateAdminAccount = require("./cp/create-admin");
 const ManageSchedules = require("./cp/manage-schedules");
 const ManageStudentsPayment = require("./cp/manage-students-payment");
 const WelcomeNewAdmin = require("./cp/welcome-new-admin");
+const ViewAndManageAdmins = require("./cp/view-and-manage-admins");
 
 const ReactDOM = require("react-dom");
 const React = require("react");
@@ -47,6 +48,10 @@ switch (currPage.textContent) {
 
   case "welcome-new-admin":
     ToRender = WelcomeNewAdmin();
+    break;
+
+  case "view-and-manage-admins":
+    ToRender = ViewAndManageAdmins();
     break;
   //------------------------------------------
   default:

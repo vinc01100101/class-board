@@ -168,7 +168,34 @@ module.exports = (app, passport, modelSchool, db) => {
             }
           }
         );
+        break;
 
+      case "view-and-manage-admins":
+        if (req.isAuthenticated()) {
+          let listOfAdmins = [];
+          modelSchool.findOne({ schoolUrl: req.user.schoolUrl }, (err, doc) => {
+            if (err) throw err;
+            if (!doc) {
+              console.log("Unexpected error: sch-!exst");
+              res.send("Unexpected error: sch-!exst");
+            } else {
+              listOfAdmins = doc.people.officials.map(x => {
+                return {
+                  name: x.firstName + " " + x.lastName,
+                  position: x.position,
+                  email: x.username,
+                  permissions: x.permissions
+                };
+              });
+              res.render(indexPug, {
+                currentPage: "view-and-manage-admins",
+                listOfAdmins: JSON.stringify(listOfAdmins)
+              });
+            }
+          });
+        } else {
+          res.send("You must log in first as an administrator");
+        }
         break;
 
       default:
@@ -345,7 +372,8 @@ module.exports = (app, passport, modelSchool, db) => {
                 schoolName: req.body["school-name"],
                 permissions: {
                   manageSchedule: true,
-                  manageStudentsPayment: true
+                  manageStudentsPayment: true,
+                  manageAdminAccounts: true
                 }
               }
             ],
@@ -409,7 +437,8 @@ module.exports = (app, passport, modelSchool, db) => {
               schoolName: req.user.schoolName,
               permissions: {
                 manageSchedule: !!req.body.sched,
-                manageStudentsPayment: !!req.body.payment
+                manageStudentsPayment: !!req.body.payment,
+                manageAdminAccounts: !!req.body["admin-accounts"]
               }
             });
             modelSchool.findOneAndUpdate(
@@ -452,9 +481,6 @@ module.exports = (app, passport, modelSchool, db) => {
   });
 
   app.get("/api/drop-collection", (req, res) => {
-    db.collectionNames("schools", (err, name) => {
-      console.log(names);
-    });
     db.collection("schools").drop((err, delOK) => {
       if (err) console.log(err);
       if (delOK) console.log("Collection Deleted.");

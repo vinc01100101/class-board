@@ -17,3 +17,17 @@
   left: 0px;
   top: 0px;
 }
+#admins-table {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 25% 25% 25% 25%;
+  background-color: #888;
+}
+#admins-table h4 {
+  text-align: center;
+  border: solid black 3px;
+}
+#admins-table div {
+  border: solid black 1px;
+  overflow-wrap: break-word;
+}

@@ -54,8 +54,9 @@ module.exports = () => {
           <div>
             <label htmlFor="position">Position: </label>
             <select id="position" name="position">
-              <option value="dean">Dean</option>
-              <option value="faculty">Faculty</option>
+              <option value="Vice President">Vice President</option>
+              <option value="Dean">Dean</option>
+              <option value="Faculty">Faculty</option>
             </select>
           </div>
           <div>
@@ -67,6 +68,14 @@ module.exports = () => {
             <div>
               <label htmlFor="payment">Manage Students Payment</label>
               <input type="checkbox" name="payment" id="payment" />
+            </div>
+            <div>
+              <label htmlFor="admin-accounts">Manage Admin Accounts</label>
+              <input
+                type="checkbox"
+                name="admin-accounts"
+                id="admin-accounts"
+              />
             </div>
           </div>
           <button type="submit">Issue this ticket</button>
