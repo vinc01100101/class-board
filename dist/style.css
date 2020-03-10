@@ -17,17 +17,104 @@
   left: 0px;
   top: 0px;
 }
+#table-container {
+  width: 100%;
+  height: 70%;
+  overflow-y: scroll;
+  position: relative;
+  z-index: 0;
+}
 #admins-table {
   display: grid;
   width: 100%;
-  grid-template-columns: 25% 25% 25% 25%;
+  grid-template-columns: 20% 20% 20% 20% 20%;
   background-color: #888;
 }
 #admins-table h4 {
   text-align: center;
   border: solid black 3px;
+
+  background-color: peachpuff;
 }
 #admins-table div {
   border: solid black 1px;
   overflow-wrap: break-word;
+}
+
+#admins-table .pending {
+  color: rgb(139, 62, 25) !important;
+}
+
+.clickable:hover,
+.clickable:focus {
+  cursor: pointer;
+  background-color: wheat;
+}
+
+#popup-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+#popup-container #popup {
+  left: 0px;
+  top: 0px;
+  padding: 10px;
+  background-color: peachpuff;
+  border: solid white 5px;
+  border-radius: 10px;
+}
+
+#popup-container #popup button {
+  background-color: black;
+  color: wheat;
+}
+#popup-container #popup #popup-id {
+  display: none;
+}
+#edit-account-container {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+#edit-account-container #edit-account {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white;
+  padding: 20px;
+  width: 300px;
+}
+#edit-account-container #edit-account #permissions {
+  text-align: left;
+}
+#edit-account-container #edit-account-update {
+  background-color: rgb(67, 236, 67);
+}
+
+#edit-account-container #edit-account-close {
+  background-color: rgb(221, 184, 21);
+}
+
+#edit-account-container #edit-account-delete {
+  background-color: rgb(119, 5, 5);
+  color: white;
+  margin: 20px;
 }

@@ -11,7 +11,7 @@ module.exports = () => {
     render() {
       return (
         <div>
-          {userProfile.position == ("President" || "Vice-President") && (
+          {userProfile.position == ("President" || "Vice President") && (
             <button
               onClick={() => {
                 window.location.href = "/?page=create-admin";
@@ -40,6 +40,7 @@ module.exports = () => {
               Manage Students Payment
             </button>
           )}
+          <br />
           <button
             onClick={() => {
               window.location.href = "/?page=view-and-manage-admins";

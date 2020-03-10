@@ -181,15 +181,18 @@ module.exports = (app, passport, modelSchool, db) => {
             } else {
               listOfAdmins = doc.people.officials.map(x => {
                 return {
+                  id: x.id,
                   name: x.firstName + " " + x.lastName,
                   position: x.position,
                   email: x.username,
-                  permissions: x.permissions
+                  permissions: x.permissions,
+                  pending: x.password.split("-")[0] == "ticket"
                 };
               });
               res.render(indexPug, {
                 currentPage: "view-and-manage-admins",
-                listOfAdmins: JSON.stringify(listOfAdmins)
+                listOfAdmins: JSON.stringify(listOfAdmins),
+                userProfile: uPToSend
               });
             }
           });
