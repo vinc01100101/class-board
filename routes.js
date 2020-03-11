@@ -192,7 +192,8 @@ module.exports = (app, passport, modelSchool, db) => {
               res.render(indexPug, {
                 currentPage: "view-and-manage-admins",
                 listOfAdmins: JSON.stringify(listOfAdmins),
-                userProfile: uPToSend
+                userProfile: uPToSend,
+                successDom: req.query.success && req.query.success
               });
             }
           });
@@ -282,7 +283,7 @@ module.exports = (app, passport, modelSchool, db) => {
             }
           }
           return false;
-        })[0];
+        });
 
         if (ind >= 0) {
           doc.people[member][ind].password = bcrypt.hashSync(
@@ -305,6 +306,75 @@ module.exports = (app, passport, modelSchool, db) => {
           );
         } else {
           res.send("Change Password Failed");
+        }
+      }
+    });
+  });
+  app.post("/update-account", (req, res) => {
+    const hierarchy = {
+      President: 5,
+      "Vice President": 4,
+      Dean: 3,
+      Faculty: 2,
+      Accountant: 2
+    };
+    modelSchool.findOne({ schoolUrl: req.user.schoolUrl }, (err, doc) => {
+      if (err) {
+        console.log("route /update-password: find-error");
+        res.send("Server Database Error");
+      } else if (!doc) {
+        console.log("route /update-password: School not found");
+        res.send("Unexpected error: err-sch-!exst");
+      } else {
+        let ind = -1;
+        const toUpdate = doc.people.officials.filter((x, i) => {
+          if (
+            x.firstName + " " + x.lastName ==
+              req.body["nameofaccount-to-edit"] &&
+            x.id == req.body["idofaccount-to-edit"]
+          ) {
+            ind = i;
+            return true;
+          }
+          return false;
+        })[0];
+
+        if (!toUpdate) {
+          console.log("Account to edit was not found");
+          res.send("Account to edit was not found");
+        } else if (
+          //Server verification | Data protection
+          !req.user.permissions.manageAdminAccounts ||
+          hierarchy[req.user.position] <= hierarchy[toUpdate.position] ||
+          hierarchy[req.user.position] <= hierarchy[req.body.position]
+        ) {
+          console.log("No permission to edit account");
+          res.send("Hey bro, don't edit the source code :D");
+        } else {
+          toUpdate.permissions.manageSchedule = !!req.body.sched;
+          toUpdate.permissions.manageStudentsPayment = !!req.body.payment;
+          toUpdate.permissions.manageAdminAccounts = !!req.body[
+            "admin-accounts"
+          ];
+          toUpdate.position = req.body.position;
+          doc.people.officials[ind] = toUpdate;
+          modelSchool.findOneAndUpdate(
+            { schoolUrl: req.user.schoolUrl },
+            doc,
+            (err, result) => {
+              if (err) {
+                console.log("Update error: " + err);
+                res.send("Server Update Error");
+              } else if (!result) {
+                console.log("Update Failed");
+                res.send("Server Update Failed");
+              } else {
+                res.redirect(
+                  "/?page=view-and-manage-admins&success=Update Successful"
+                );
+              }
+            }
+          );
         }
       }
     });

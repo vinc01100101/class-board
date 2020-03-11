@@ -14,83 +14,134 @@ module.exports = () => {
   const listOfAdmins = JSON.parse(
     document.getElementById("listOfAdmins").textContent
   );
-  const generatePermissionList = p => {
-    let permList = "";
-    for (const prop in p) {
-      permList += p[prop] ? "<li>" + prop + "</li>" : "";
-    }
-    return permList;
-  };
-  const recognizeRel = (user, target, perm) => {
-    return perm && hierarchy[user] > hierarchy[target];
-  };
-  const mapList = listOfAdmins.map((x, i) => {
-    return `<div class="${(x.pending ? "pending" : "") +
-      " " +
-      (recognizeRel(
-        userProfile.position,
-        x.position,
-        userProfile.permissions.manageAdminAccounts
-      )
-        ? "clickable"
-        : "")}">${x.id}</div>
-        <div  ${x.pending ? 'class="pending"' : ""}>${x.name}</div>
-    <div ${x.pending ? 'class="pending"' : ""}>${x.position}</div>
-    <div ${x.pending ? 'class="pending"' : ""}>${x.email}</div>
-    <div><ul ${x.pending ? 'class="pending"' : ""}>${generatePermissionList(
-      x.permissions
-    )}</ul></div>
-    `;
-  });
-  mapList.unshift(
-    `<h4>ID</h4>
-    <h4>Name</h4>
-    <h4>Position</h4>
-    <h4>Email</h4>
-    <h4>Permissions</h4>`
-  );
-  const html = {
-    __html: mapList.join("")
-  };
+
+  let popupContainer;
+  let popupName;
+  let popupId;
+  let oldHtml = "";
+
   return class extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
-        showManageAdmin: true
+        showManageAdmin: true,
+        posLevel: 5,
+        html: {
+          __html: this.generateHtml(listOfAdmins)
+        }
       };
       this.__popupContClick = this.__popupContClick.bind(this);
       this._editOnClick = this._editOnClick.bind(this);
       this._editClose = this._editClose.bind(this);
       this.__posOnChange = this.__posOnChange.bind(this);
+      this._sort = this._sort.bind(this);
+      this.generateHtml = this.generateHtml.bind(this);
+      this.setListeners = this.setListeners.bind(this);
     }
 
     componentDidMount() {
-      const popupContainer = document.getElementById("popup-container");
-      const popupName = document.getElementById("popup-name");
-      const popupId = document.getElementById("popup-id");
+      popupContainer = document.getElementById("popup-container");
+      popupName = document.getElementById("popup-name");
+      popupId = document.getElementById("popup-id");
+      this._sort("position.-1");
+      this.setListeners();
+    }
 
-      function _handleClick(e) {
-        // popup.style.left = e.clientX;
-        // popup.style.top = e.clientY;
-        popupName.textContent = listOfAdmins.filter(
-          x => x.id == e.target.textContent
-        )[0].name;
-        popupId.textContent = e.target.textContent;
-        popupContainer.style.display = "flex";
-      }
-      const clicks = document.getElementsByClassName("clickable");
+    componentDidUpdate() {
+      this.setListeners();
+    }
+    setListeners() {
+      if (oldHtml != this.state.html.__html) {
+        function _handleClick(e) {
+          console.log("CLICKED");
+          const toEdit = listOfAdmins.filter(
+            x => x.id == e.target.textContent
+          )[0];
 
-      for (const props in clicks) {
-        !isNaN(parseInt(props)) &&
-          clicks[props].addEventListener("click", _handleClick);
+          popupName.textContent = toEdit.name;
+          popupId.textContent = e.target.textContent;
+          popupContainer.style.display = "flex";
+        }
+        const clicks = document.getElementsByClassName("clickable");
+
+        for (const props in clicks) {
+          !isNaN(parseInt(props)) &&
+            clicks[props].addEventListener("click", _handleClick);
+        }
+
+        oldHtml = this.state.html.__html;
       }
+    }
+    generateHtml(argumentListOfAdmins) {
+      const generatePermissionList = p => {
+        let permList = "";
+        for (const prop in p) {
+          permList += p[prop] ? "<li>" + prop + "</li>" : "";
+        }
+        return permList;
+      };
+      const recognizeRel = (user, target, perm) => {
+        return perm && hierarchy[user] > hierarchy[target];
+      };
+      const mapList = argumentListOfAdmins.map((x, i) => {
+        return `<div class="${(x.pending ? "pending" : "") +
+          " " +
+          (recognizeRel(
+            userProfile.position,
+            x.position,
+            userProfile.permissions.manageAdminAccounts
+          )
+            ? "clickable"
+            : "")}">${x.id}</div>
+            <div  ${x.pending ? 'class="pending"' : ""}>${x.name}</div>
+        <div ${x.pending ? 'class="pending"' : ""}>${x.position}</div>
+        <div ${x.pending ? 'class="pending"' : ""}>${x.email}</div>
+        <div><ul ${x.pending ? 'class="pending"' : ""}>${generatePermissionList(
+          x.permissions
+        )}</ul></div>
+        `;
+      });
+      mapList.unshift(
+        `<h4>ID</h4>
+        <h4>Name</h4>
+        <h4>Position</h4>
+        <h4>Email</h4>
+        <h4>Permissions</h4>`
+      );
+
+      return mapList.join("");
     }
     __popupContClick(e) {
-      const cont = document.getElementById("popup-container");
-      if (e.target == cont) cont.style.display = "none";
+      if (e.target == popupContainer) popupContainer.style.display = "none";
     }
     _editOnClick() {
-      document.getElementById("popup-container").style.display = "none";
+      popupContainer.style.display = "none";
+
+      const accountToEdit = listOfAdmins.filter(
+        x => x.id == popupId.textContent && x.name == popupName.textContent
+      )[0];
+      document.getElementById("h4-nameofaccount-to-edit").textContent =
+        accountToEdit.name;
+      document.getElementById("nameofaccount-to-edit").value =
+        accountToEdit.name;
+      document.getElementById("idofaccount-to-edit").value = accountToEdit.id;
+      document.getElementById("position").value = accountToEdit.position;
+      document.getElementById("sched").checked =
+        accountToEdit.permissions.manageSchedule && true;
+      document.getElementById("payment").checked =
+        accountToEdit.permissions.manageStudentsPayment && true;
+      const adminCheckDom = document.getElementById("admin-accounts");
+      if (adminCheckDom)
+        adminCheckDom.checked =
+          accountToEdit.permissions.manageAdminAccounts && true;
+
+      accountToEdit.position == "Accountant" ||
+      accountToEdit.position == "Faculty"
+        ? this.setState({ showManageAdmin: false })
+        : this.setState({ showManageAdmin: true });
+      this.setState({
+        posLevel: hierarchy[userProfile.position]
+      });
       document.getElementById("edit-account-container").style.display = "flex";
     }
     __posOnChange(e) {
@@ -101,11 +152,41 @@ module.exports = () => {
     _editClose() {
       document.getElementById("edit-account-container").style.display = "none";
     }
+    _sort(e) {
+      let sortedList = [...listOfAdmins];
+      const splitted = e.target ? e.target.value.split(".") : e.split(".");
+      const column = splitted[0];
+      const mode = parseInt(splitted[1]);
+      sortedList.sort((a, b) => {
+        let compA, compB;
+        if (column == "name") {
+          compA = a[column];
+          compB = b[column];
+        } else {
+          compA = hierarchy[a[column]];
+          compB = hierarchy[b[column]];
+        }
+
+        if (compA > compB) {
+          return mode;
+        }
+        if (compB > compA) {
+          return -mode;
+        }
+        return 0;
+      });
+      this.setState({
+        html: {
+          __html: this.generateHtml(sortedList)
+        }
+      });
+    }
     render() {
+      const successDom = document.getElementById("successDom").textContent;
       return (
         <div>
           <h1>View and manage admin accounts</h1>
-
+          <h4 style={{ color: "green" }}>{successDom}</h4>
           <div id="popup-container" onClick={this.__popupContClick}>
             <div id="popup">
               <h4 id="popup-name"></h4>
@@ -115,7 +196,20 @@ module.exports = () => {
           </div>
 
           <div id="edit-account-container">
-            <form id="edit-account">
+            <form id="edit-account" action="/update-account" method="POST">
+              <input
+                type="text"
+                style={{ display: "none" }}
+                id="nameofaccount-to-edit"
+                name="nameofaccount-to-edit"
+              />
+              <input
+                type="text"
+                style={{ display: "none" }}
+                id="idofaccount-to-edit"
+                name="idofaccount-to-edit"
+              />
+              <h4 id="h4-nameofaccount-to-edit" />
               <div>
                 <label htmlFor="position">Position: </label>
                 <select
@@ -123,10 +217,18 @@ module.exports = () => {
                   name="position"
                   onChange={this.__posOnChange}
                 >
-                  <option value="Vice President">Vice President</option>
-                  <option value="Dean">Dean</option>
-                  <option value="Faculty">Faculty</option>
-                  <option value="Accountant">Accountant</option>
+                  {this.state.posLevel > 4 && (
+                    <option value="Vice President">Vice President</option>
+                  )}
+                  {this.state.posLevel > 3 && (
+                    <option value="Dean">Dean</option>
+                  )}
+                  {this.state.posLevel > 2 && (
+                    <option value="Faculty">Faculty</option>
+                  )}
+                  {this.state.posLevel > 2 && (
+                    <option value="Accountant">Accountant</option>
+                  )}
                 </select>
               </div>
               <p>Permissions: </p>
@@ -162,8 +264,15 @@ module.exports = () => {
             </button>
           </div>
 
+          <label htmlFor="sortby">Sort By: </label>
+          <select id="sortby" onChange={this._sort} defaultValue="position.-1">
+            <option value="name.1">Name(A-Z)</option>
+            <option value="name.-1">Name(Z-A)</option>
+            <option value="position.1">Position(Incrementing)</option>
+            <option value="position.-1">Position(Decrementing)</option>
+          </select>
           <div id="table-container">
-            <div id="admins-table" dangerouslySetInnerHTML={html} />
+            <div id="admins-table" dangerouslySetInnerHTML={this.state.html} />
           </div>
         </div>
       );
