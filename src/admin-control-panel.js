@@ -49,6 +49,7 @@ module.exports = () => {
             View And Manage Admins
           </button>
           <br />
+          <a href={"/" + userProfile.schoolUrl}>Back</a>
         </div>
       );
     }

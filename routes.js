@@ -3,6 +3,13 @@ const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const flash = require("connect-flash");
 
+const hierarchy = {
+  President: 5,
+  "Vice President": 4,
+  Dean: 3,
+  Faculty: 2,
+  Accountant: 2
+};
 module.exports = (app, passport, modelSchool, db) => {
   app.use(flash());
 
@@ -29,7 +36,8 @@ module.exports = (app, passport, modelSchool, db) => {
         member: member,
         position: req.user.position,
         schoolName: req.user.schoolName,
-        permissions: req.user.permissions
+        permissions: req.user.permissions,
+        schoolUrl: req.user.schoolUrl
       });
     console.log(member);
     switch (req.query.page) {
@@ -193,7 +201,8 @@ module.exports = (app, passport, modelSchool, db) => {
                 currentPage: "view-and-manage-admins",
                 listOfAdmins: JSON.stringify(listOfAdmins),
                 userProfile: uPToSend,
-                successDom: req.query.success && req.query.success
+                successDom: req.query.success && req.query.success,
+                errorDom: req.query.error && req.query.error
               });
             }
           });
@@ -311,19 +320,12 @@ module.exports = (app, passport, modelSchool, db) => {
     });
   });
   app.post("/update-account", (req, res) => {
-    const hierarchy = {
-      President: 5,
-      "Vice President": 4,
-      Dean: 3,
-      Faculty: 2,
-      Accountant: 2
-    };
     modelSchool.findOne({ schoolUrl: req.user.schoolUrl }, (err, doc) => {
       if (err) {
-        console.log("route /update-password: find-error");
+        console.log("route /update-account: find-error");
         res.send("Server Database Error");
       } else if (!doc) {
-        console.log("route /update-password: School not found");
+        console.log("route /update-account: School not found");
         res.send("Unexpected error: err-sch-!exst");
       } else {
         let ind = -1;
@@ -349,7 +351,9 @@ module.exports = (app, passport, modelSchool, db) => {
           hierarchy[req.user.position] <= hierarchy[req.body.position]
         ) {
           console.log("No permission to edit account");
-          res.send("Hey bro, don't edit the source code :D");
+          res.redirect(
+            "/?page=view-and-manage-admins&error=Hey bro don't edit the source code :D"
+          );
         } else {
           toUpdate.permissions.manageSchedule = !!req.body.sched;
           toUpdate.permissions.manageStudentsPayment = !!req.body.payment;
@@ -379,12 +383,67 @@ module.exports = (app, passport, modelSchool, db) => {
       }
     });
   });
+  app.post("/delete-account", (req, res) => {
+    modelSchool.findOne({ schoolUrl: req.user.schoolUrl }, (err, doc) => {
+      if (err) {
+        console.log("route /delete-account: find-error");
+        res.send("Server Database Error");
+      } else if (!doc) {
+        console.log("route /delete-account: School not found");
+        res.send("Unexpected error: err-sch-!exst");
+      } else {
+        let ind = -1;
+        const toUpdate = doc.people.officials.filter((x, i) => {
+          if (
+            x.firstName + " " + x.lastName ==
+              req.body["nameofaccount-to-delete"] &&
+            x.id == req.body["idofaccount-to-delete"]
+          ) {
+            ind = i;
+            return true;
+          }
+          return false;
+        })[0];
+
+        if (!toUpdate) {
+          console.log("Account to delete was not found");
+          res.send("Account to delete was not found");
+        } else if (
+          //Server verification | Data protection
+          !req.user.permissions.manageAdminAccounts ||
+          hierarchy[req.user.position] <= hierarchy[toUpdate.position]
+        ) {
+          console.log("No permission to edit account");
+          res.redirect(
+            "/?page=view-and-manage-admins&error=Hey bro don't edit the source code :D"
+          );
+        } else {
+          doc.people.officials.splice(ind, 1);
+          modelSchool.findOneAndUpdate(
+            { schoolUrl: req.user.schoolUrl },
+            doc,
+            (err, result) => {
+              if (err) {
+                console.log("Delete error: " + err);
+                res.send("Server Database Error");
+              } else if (!result) {
+                console.log("Delete Failed");
+                res.send("Server Database Failed");
+              } else {
+                res.redirect(
+                  "/?page=view-and-manage-admins&success=Account Deletion Successful"
+                );
+              }
+            }
+          );
+        }
+      }
+    });
+  });
   //for School URL Params
   app.get("/:schparams", (req, res) => {
     if (req.isAuthenticated()) {
-      res.render(indexPug, {
-        currentPage: "profile"
-      });
+      res.redirect("/?page=profile");
     } else {
       dbSearchSchool(req.params.schparams, (err, doc) => {
         if (err) {

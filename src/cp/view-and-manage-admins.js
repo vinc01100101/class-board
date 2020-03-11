@@ -125,6 +125,9 @@ module.exports = () => {
       document.getElementById("nameofaccount-to-edit").value =
         accountToEdit.name;
       document.getElementById("idofaccount-to-edit").value = accountToEdit.id;
+      document.getElementById("nameofaccount-to-delete").value =
+        accountToEdit.name;
+      document.getElementById("idofaccount-to-delete").value = accountToEdit.id;
       document.getElementById("position").value = accountToEdit.position;
       document.getElementById("sched").checked =
         accountToEdit.permissions.manageSchedule && true;
@@ -181,12 +184,22 @@ module.exports = () => {
         }
       });
     }
+    _handleSubmit(e) {
+      const conf = confirm(
+        e.target.id == "delete-account"
+          ? "Are you sure to DELETE this account?"
+          : "Proceed UPDATING this account?"
+      );
+      !conf && e.preventDefault();
+    }
     render() {
       const successDom = document.getElementById("successDom").textContent;
+      const errorDom = document.getElementById("errorDom").textContent;
       return (
         <div>
           <h1>View and manage admin accounts</h1>
           <h4 style={{ color: "green" }}>{successDom}</h4>
+          <h4 style={{ color: "red" }}>{errorDom}</h4>
           <div id="popup-container" onClick={this.__popupContClick}>
             <div id="popup">
               <h4 id="popup-name"></h4>
@@ -196,7 +209,12 @@ module.exports = () => {
           </div>
 
           <div id="edit-account-container">
-            <form id="edit-account" action="/update-account" method="POST">
+            <form
+              id="edit-account"
+              action="/update-account"
+              method="POST"
+              onSubmit={this._handleSubmit}
+            >
               <input
                 type="text"
                 style={{ display: "none" }}
@@ -258,7 +276,29 @@ module.exports = () => {
                 Update
               </button>
             </form>
-            <button id="edit-account-delete">(!!) Delete This Account</button>
+            <form
+              action="/delete-account"
+              method="POST"
+              id="delete-account"
+              onSubmit={this._handleSubmit}
+            >
+              <input
+                type="text"
+                style={{ display: "none" }}
+                id="nameofaccount-to-delete"
+                name="nameofaccount-to-delete"
+              />
+              <input
+                type="text"
+                style={{ display: "none" }}
+                id="idofaccount-to-delete"
+                name="idofaccount-to-delete"
+              />
+              <button type="submit" id="edit-account-delete">
+                (!!) Delete This Account
+              </button>
+            </form>
+
             <button id="edit-account-close" onClick={this._editClose}>
               Cancel
             </button>
@@ -274,6 +314,7 @@ module.exports = () => {
           <div id="table-container">
             <div id="admins-table" dangerouslySetInnerHTML={this.state.html} />
           </div>
+          <a href="/?page=control-panel">Back</a>
         </div>
       );
     }
