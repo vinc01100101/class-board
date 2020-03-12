@@ -17,7 +17,7 @@ module.exports = () => {
           </p>
           <br />
           <form action="/schoolfromselect" method="POST">
-            <p>Or select your school here: </p>
+            <p>Or select here: </p>
             <label htmlFor="school-name">School Name: </label>
             <select name="school-name" id="school-name">
               {domSchoolsTxt.map((x, i) => (
