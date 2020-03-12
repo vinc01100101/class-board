@@ -1,9 +1,12 @@
 html
  head
   title GATE
+  meta(charset="UTF-8")
+  meta(name="viewport" content="width=device-width, initial-scale=1.0")
   link(rel="stylesheet", href="./style.css")
  body
   h1 Single Page
+  p(style='color:red') (Please ignore this info, I only use this for rendering reference)
   div(id='currentPage') #{currentPage}
   div(id='errorDom') #{errorDom}
   div(id='successDom') #{successDom}
@@ -13,5 +16,7 @@ html
   div(id='schoolPageLayout') #{schoolPageLayout} <!-- SchoolPage custom style JSON-->
   div(id='listOfAdmins') #{listOfAdmins} <!-- List of admins -->
 
+  hr
   div(id='root')
   script(src='./gate-bundle.js')
+ 

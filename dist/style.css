@@ -1,3 +1,14 @@
+body{
+  
+  overflow-wrap: break-word;
+}
+hr{
+  height: 12px;
+  background: black;
+}
+#root{
+  text-align: center;
+}
 #register {
   color: blue;
 }
@@ -19,7 +30,7 @@
 }
 #table-container {
   width: 100%;
-  height: 70%;
+  max-height: 70%;
   overflow-y: scroll;
   position: relative;
   z-index: 0;

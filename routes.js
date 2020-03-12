@@ -322,7 +322,7 @@ module.exports = (app, passport, modelSchool, db) => {
               } else if (!result) {
                 res.send("Failed To Change Password");
               } else {
-                res.send("Change Password Successful");
+                res.send("Change Password Successful <br><a href='/'>Back</a>");
               }
             }
           );
@@ -606,7 +606,7 @@ module.exports = (app, passport, modelSchool, db) => {
                     req.body.position +
                     "<br>" +
                     ticket +
-                    "</h4>";
+                    "</h4><a href='/'>Back</a>";
 
                   res.send(ticketString);
                 }
@@ -630,5 +630,5 @@ module.exports = (app, passport, modelSchool, db) => {
 
       res.redirect("/");
     });
-  });
+  }); 
 };

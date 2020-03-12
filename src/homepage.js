@@ -8,10 +8,11 @@ module.exports = () => {
       return (
         <div>
           <h1>Welcome to ClassBoard!</h1>
-
+          <p style={{color: "green"}}>(Under development)</p>
+          <p>Every registered school will have their own customizable School Page</p>
           <p>Navigate to your school using this url format: </p>
           <p>
-            <span style={{ color: "purple" }}>https://classboard.com/</span>
+            <span style={{ color: "purple" }}>https://vince-class-board.glitch.me/</span>
             <span style={{ color: "red" }}>school_name</span>
           </p>
           <br />
@@ -34,7 +35,7 @@ module.exports = () => {
             Your school isn't registered yet? Join us!{" "}
             <a href="/?page=register">Here's How.</a>
           </p>
-          <a href="/api/drop-collection">Delete Collections From Database</a>
+          <a href="/api/drop-collection"><span style={{color: 'red'}}>Delete Collections From Database(Development Mode Only)</span></a>
         </div>
       );
     }

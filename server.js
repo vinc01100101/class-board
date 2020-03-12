@@ -14,7 +14,7 @@ const auth = require("./auth");
 connEvents(mongoose, colors);
 
 const dburi = process.env.DB;
-
+ 
 mongoose.connect(
   dburi,
   { useNewUrlParser: true, useUnifiedTopology: true },
