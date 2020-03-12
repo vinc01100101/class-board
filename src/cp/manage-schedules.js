@@ -7,7 +7,10 @@ module.exports = () => {
     }
 
     render() {
-      return <div>Manage Schedules</div>;
+      return <div>
+      Manage Schedules
+      <h1>This feature is not yet implemented. </h1>
+      </div>;
     }
   };
 };

@@ -197,7 +197,12 @@ module.exports = () => {
       const errorDom = document.getElementById("errorDom").textContent;
       return (
         <div>
+          
           <h1>View and manage admin accounts</h1>
+          <ul>
+            <li>You can only edit accounts if you have the permission</li>
+            <li>You can only edit accounts of those whose position is descendant of yours</li>
+          </ul>
           <h4 style={{ color: "green" }}>{successDom}</h4>
           <h4 style={{ color: "red" }}>{errorDom}</h4>
           <div id="popup-container" onClick={this.__popupContClick}>
