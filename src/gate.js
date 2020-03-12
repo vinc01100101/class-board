@@ -42,7 +42,7 @@ switch (currPage.textContent) {
     ToRender = ManageSchedules();
     break;
 
-  case "manage-students-payments":
+  case "manage-students-payment":
     ToRender = ManageStudentsPayment();
     break;
 

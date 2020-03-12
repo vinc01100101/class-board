@@ -21,6 +21,14 @@ module.exports = () => {
             </button>
           )}
           <br />
+          <button
+            onClick={() => {
+              window.location.href = "/?page=view-and-manage-admins";
+            }}
+          >
+            View And Manage Admins
+          </button>
+          <br />
           {userProfile.permissions.manageSchedule && (
             <button
               onClick={() => {
@@ -41,14 +49,7 @@ module.exports = () => {
             </button>
           )}
           <br />
-          <button
-            onClick={() => {
-              window.location.href = "/?page=view-and-manage-admins";
-            }}
-          >
-            View And Manage Admins
-          </button>
-          <br />
+
           <a href={"/" + userProfile.schoolUrl}>Back</a>
         </div>
       );

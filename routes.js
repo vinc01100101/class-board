@@ -1,4 +1,3 @@
-const indexPug = __dirname + "/dist/index.pug";
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const flash = require("connect-flash");
@@ -9,6 +8,23 @@ const hierarchy = {
   Dean: 3,
   Faculty: 2,
   Accountant: 2
+};
+
+const renderPage = (res, props) => {
+  res.render(__dirname + "/dist/index.pug", props);
+};
+
+const getListOfAdmins = officials => {
+  return officials.map(x => {
+    return {
+      id: x.id,
+      name: x.firstName + " " + x.lastName,
+      position: x.position,
+      email: x.username,
+      permissions: x.permissions,
+      pending: x.password.split("-")[0] == "ticket"
+    };
+  });
 };
 module.exports = (app, passport, modelSchool, db) => {
   app.use(flash());
@@ -50,7 +66,7 @@ module.exports = (app, passport, modelSchool, db) => {
             .find({ schoolUrl: /./ })
             .select("layout")
             .exec((err, doc) => {
-              res.render(indexPug, {
+              renderPage(res, {
                 currentPage: "homepage",
                 schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });
@@ -61,7 +77,7 @@ module.exports = (app, passport, modelSchool, db) => {
 
       case "profile":
         if (req.isAuthenticated()) {
-          res.render(indexPug, {
+          renderPage(res, {
             currentPage: "profile",
             userProfile: uPToSend
           });
@@ -74,7 +90,7 @@ module.exports = (app, passport, modelSchool, db) => {
         if (req.isAuthenticated()) {
           res.redirect("/?page=profile");
         } else {
-          res.render(indexPug, {
+          renderPage(res, {
             currentPage: "register"
           });
         }
@@ -83,60 +99,60 @@ module.exports = (app, passport, modelSchool, db) => {
       case "control-panel":
         if (req.isAuthenticated()) {
           if (isOfficial) {
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "control-panel",
               userProfile: uPToSend
             });
           } else {
-            res.send("Students cannot access this page :D");
+            res.redirect("/");
           }
         } else {
-          res.send("You must log in first as an administrator");
+          res.redirect("/");
         }
         break;
 
       case "create-admin":
         if (req.isAuthenticated()) {
           if (req.user.position == ("President" || "Vice-President")) {
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "create-admin",
               userProfile: uPToSend
             });
           } else {
-            res.send("No permission to access this page");
+            res.redirect("/");
           }
         } else {
-          res.send("You must log in first as an administrator");
+          res.redirect("/");
         }
         break;
 
       case "manage-schedules":
         if (req.isAuthenticated()) {
           if (req.user.permissions.manageSchedule) {
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "manage-schedules",
               userProfile: uPToSend
             });
           } else {
-            res.send("No permission to access this page");
+            res.redirect("/");
           }
         } else {
-          res.send("You must log in first as an administrator");
+          res.redirect("/");
         }
         break;
 
       case "manage-students-payment":
         if (req.isAuthenticated()) {
           if (req.user.permissions.manageStudentsPayment) {
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "manage-students-payment",
               userProfile: uPToSend
             });
           } else {
-            res.send("No permission to access this page");
+            res.redirect("/");
           }
         } else {
-          res.send("You must log in first as an administrator");
+          res.redirect("/");
         }
         break;
 
@@ -146,7 +162,7 @@ module.exports = (app, passport, modelSchool, db) => {
           (err, doc) => {
             if (err) {
               console.log("Database error upon accessing welcome-new-admin");
-              res.send("Database Error");
+              res.send("Database Error: " + err);
             } else if (!doc) {
               console.log("School url does not exist");
               res.send("No Permission to access this page: err-sch-!exst");
@@ -161,9 +177,9 @@ module.exports = (app, passport, modelSchool, db) => {
               })[0];
 
               if (!usr) {
-                res.send("No Permission to access this page: err-usr-!exst");
+                res.redirect("/");
               } else {
-                res.render(indexPug, {
+                renderPage(res, {
                   currentPage: "welcome-new-admin",
                   userProfile: JSON.stringify({
                     username: req.query.user,
@@ -180,34 +196,31 @@ module.exports = (app, passport, modelSchool, db) => {
 
       case "view-and-manage-admins":
         if (req.isAuthenticated()) {
-          let listOfAdmins = [];
           modelSchool.findOne({ schoolUrl: req.user.schoolUrl }, (err, doc) => {
             if (err) throw err;
             if (!doc) {
               console.log("Unexpected error: sch-!exst");
               res.send("Unexpected error: sch-!exst");
             } else {
-              listOfAdmins = doc.people.officials.map(x => {
-                return {
-                  id: x.id,
-                  name: x.firstName + " " + x.lastName,
-                  position: x.position,
-                  email: x.username,
-                  permissions: x.permissions,
-                  pending: x.password.split("-")[0] == "ticket"
-                };
-              });
-              res.render(indexPug, {
+              renderPage(res, {
                 currentPage: "view-and-manage-admins",
-                listOfAdmins: JSON.stringify(listOfAdmins),
+                listOfAdmins: JSON.stringify(
+                  getListOfAdmins(doc.people.officials)
+                ),
                 userProfile: uPToSend,
-                successDom: req.query.success && req.query.success,
-                errorDom: req.query.error && req.query.error
+                successDom:
+                  req.query.success &&
+                  bcrypt.compareSync("true", req.query.success) &&
+                  "Update Successful",
+                errorDom:
+                  req.query.error &&
+                  bcrypt.compareSync("true", req.query.error) &&
+                  "Hey bro don't edit the source code :D"
               });
             }
           });
         } else {
-          res.send("You must log in first as an administrator");
+          res.redirect("/");
         }
         break;
 
@@ -244,7 +257,7 @@ module.exports = (app, passport, modelSchool, db) => {
         const usr = doc.people.officials.filter(x => x.password == ticket)[0];
 
         if (!usr) {
-          res.render(indexPug, {
+          renderPage(res, {
             currentPage: "schoolhomepage",
             schoolPageLayout: JSON.stringify(doc.layout),
             errorDom: "Invalid Ticket"
@@ -351,9 +364,8 @@ module.exports = (app, passport, modelSchool, db) => {
           hierarchy[req.user.position] <= hierarchy[req.body.position]
         ) {
           console.log("No permission to edit account");
-          res.redirect(
-            "/?page=view-and-manage-admins&error=Hey bro don't edit the source code :D"
-          );
+          const hash = bcrypt.hashSync("true", 1);
+          res.redirect("/?page=view-and-manage-admins&error=" + hash);
         } else {
           toUpdate.permissions.manageSchedule = !!req.body.sched;
           toUpdate.permissions.manageStudentsPayment = !!req.body.payment;
@@ -373,9 +385,8 @@ module.exports = (app, passport, modelSchool, db) => {
                 console.log("Update Failed");
                 res.send("Server Update Failed");
               } else {
-                res.redirect(
-                  "/?page=view-and-manage-admins&success=Update Successful"
-                );
+                const hash = bcrypt.hashSync("true", 1);
+                res.redirect("/?page=view-and-manage-admins&success=" + hash);
               }
             }
           );
@@ -452,7 +463,7 @@ module.exports = (app, passport, modelSchool, db) => {
         } else if (!doc) {
           res.send("School not registered.");
         } else {
-          res.render(indexPug, {
+          renderPage(res, {
             currentPage: "schoolhomepage",
             schoolPageLayout: JSON.stringify(doc.layout),
             errorDom: req.flash("error")
@@ -475,7 +486,7 @@ module.exports = (app, passport, modelSchool, db) => {
         console.log("Db 'findOne' Error: " + err);
         res.status("500").send("Server error 500");
       } else if (doc) {
-        res.render(indexPug, {
+        renderPage(res, {
           currentPage: "register",
           errorDom: `School name "${req.body["school-name"]}" already exist`
         });
@@ -523,7 +534,7 @@ module.exports = (app, passport, modelSchool, db) => {
             res.status("500").send("Database Error");
           } else {
             console.log("Registration Successful.");
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "register",
               successDom: "Success!"
             });
@@ -552,7 +563,7 @@ module.exports = (app, passport, modelSchool, db) => {
           console.log("IS EXISTING?: " + isExisting);
           if (isExisting) {
             console.log("Email already exists.");
-            res.render(indexPug, {
+            renderPage(res, {
               currentPage: "create-admin",
               errorDom: "Email already exists."
             });
