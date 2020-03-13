@@ -38,12 +38,13 @@ module.exports = () => {
         <div>
           <h1>YOUR SCHOOL HOME PAGE</h1>
           <h2>Welcome to {schoolPageLayout.schoolName}</h2>
-          <label htmlFor="is-ticket">Insert ticket code</label>
           <input
             type="checkbox"
             id="is-ticket"
             onChange={this._checkBoxOnChange}
           />
+          <label htmlFor="is-ticket">Insert ticket code <span style={{color: 'green'}}>(for new admin accounts only)</span></label>
+          
           <p style={{ color: "red" }}>{errorDom}</p>
           {!this.state.isOn ? (
             <Login _onSubmitEmail={this._onSubmitEmail} />
@@ -101,7 +102,7 @@ module.exports = () => {
           <input type="password" id="password" name="password" required />
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit">Login</button>
       </form>
     );
   }
@@ -120,7 +121,7 @@ module.exports = () => {
             <label htmlFor="ticket">Ticket Code</label>
             <input type="text" id="ticket" name="ticket" />
           </div>
-          <button type="submit">Submit</button>
+          <button type="submit">Validate</button>
         </form>
       </div>
     );
