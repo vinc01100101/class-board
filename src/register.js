@@ -37,6 +37,8 @@ module.exports = () => {
         <div>
           <h3>End-User License Agreement</h3>
           <p>Agreement agreement lorem ipsum blah blah...</p>
+          <p>etc.. etc.. blah blahh agreement agreement</p>
+          <p>blah blah wow you're still reading this</p>
           <label htmlFor="agree">
             <span style={{ fontWeight: "bold" ,fontSize: 24}}>Agree and register</span>
           </label>
