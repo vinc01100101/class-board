@@ -52,6 +52,21 @@ module.exports = () => {
           )}
 
           <a href="/">Back</a>
+          <br />
+          <br />
+          <h4>Like this school? Smash that like button!</h4>
+          <div
+            class="fb-like"
+            data-href={
+              "https://vince-class-board.glitch.me/" +
+              schoolPageLayout.schoolUrl
+            }
+            data-width="30"
+            data-layout="box_count"
+            data-action="like"
+            data-size="large"
+            data-share="true"
+          />
         </div>
       );
     }

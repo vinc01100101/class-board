@@ -259,13 +259,14 @@ module.exports = (app, passport, modelSchool, db) => {
       console.log("PARAAAAAMS: " + req.params.schparams);
       res.redirect("/?page=profile");
     } else {
-      dbSearchSchool(res, req.params.schparams, doc => {
-        renderPage(res, {
-          currentPage: "schoolhomepage",
-          schoolPageLayout: JSON.stringify(doc.layout),
-          errorDom: req.flash("error")
+      req.params.schparams != "favicon.ico" &&
+        dbSearchSchool(res, req.params.schparams, doc => {
+          renderPage(res, {
+            currentPage: "schoolhomepage",
+            schoolPageLayout: JSON.stringify(doc.layout),
+            errorDom: req.flash("error")
+          });
         });
-      });
     }
   });
   app.post(
@@ -504,7 +505,7 @@ module.exports = (app, passport, modelSchool, db) => {
             ],
             students: []
           },
-          courses: [],
+          courses: {},
           layout: {
             schoolName: req.body["school-name"],
             schoolUrl: schurl

@@ -5,6 +5,9 @@ html
   meta(name="viewport" content="width=device-width, initial-scale=1.0")
   link(rel="stylesheet", href="./style.css" type='text/css')
  body
+  div(id="fb-root")
+  script(async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0")
+  
   h1 Single Page
   p(style='color:red') (Please ignore this info, I only use this for rendering reference)
   div(id='currentPage') #{currentPage}
