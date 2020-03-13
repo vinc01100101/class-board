@@ -28,13 +28,7 @@ module.exports = () => {
           <BasicInfo />
           {isOfficial && <a href="/?page=control-panel">Control Panel</a>}
           <br />
-          <button
-            onClick={() => {
-              window.location.href = "/api/logout";
-            }}
-          >
-            Logout
-          </button>
+          <a href="/logout">LOGOUT</a>
         </div>
       );
     }

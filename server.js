@@ -14,7 +14,7 @@ const auth = require("./auth");
 connEvents(mongoose, colors);
 
 const dburi = process.env.DB;
- 
+
 mongoose.connect(
   dburi,
   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -43,18 +43,6 @@ mongoose.connect(
       var modelSchool = mongoose.model("school", schemaSchool);
 
       //-------------------------------
-      app.use((req, res, next) => {
-        console.log(
-          "_____________________" +
-            "\nMETHOD: " +
-            req.method +
-            "\nPATH: " +
-            req.path +
-            "\nIP: " +
-            (req.ip || req.connection.remoteAddress)
-        );
-        next();
-      });
 
       app.set("view engine", "pug");
       app.use(express.static(__dirname + "/dist"));
