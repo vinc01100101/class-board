@@ -93,6 +93,7 @@ module.exports = (app, passport, modelSchool, db) => {
             .select("layout")
             .exec((err, doc) => {
               renderPage(res, {
+                tunnel: process.env.TUNNEL,
                 currentPage: "homepage",
                 schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });

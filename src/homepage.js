@@ -47,7 +47,8 @@ module.exports = () => {
           </h5>
           <div
             className="fb-like"
-            data-href="https://vince-class-board.glitch.me/"
+            // data-href="https://vince-class-board.glitch.me/"
+            data-href={process.env.TUNNEL}
             data-width="30"
             data-layout="box_count"
             data-action="like"
