@@ -93,7 +93,6 @@ module.exports = (app, passport, modelSchool, db) => {
             .select("layout")
             .exec((err, doc) => {
               renderPage(res, {
-                tunnel: process.env.TUNNEL,
                 currentPage: "homepage",
                 schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });
@@ -480,6 +479,8 @@ module.exports = (app, passport, modelSchool, db) => {
         const schurl = req.body["school-name"]
           .toLowerCase()
           .replace(/\s/g, "_");
+
+        //DATA STRUCTURE
         const documentSchool = new modelSchool({
           username: req.body.username,
           password: hash,
@@ -506,7 +507,15 @@ module.exports = (app, passport, modelSchool, db) => {
             ],
             students: []
           },
-          courses: {},
+          courses: [
+            ["BSCpE", "I", "II", "III", "IV", "V"],
+            ["BSEcE", "I", "II", "III", "IV", "V"]
+          ], //send THESE to indexPug
+          curriculum: {
+            Algebra: [2, ["BSCpE", "I"], ["BSEcE", "I"]],
+            Geometry: [3, ["BSCpE", "I"], ["BSEcE", "I"]],
+            Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
+          },
           layout: {
             schoolName: req.body["school-name"],
             schoolUrl: schurl

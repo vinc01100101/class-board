@@ -42,13 +42,10 @@ module.exports = () => {
             Your school isn't registered yet? Join us!{" "}
             <a href="/?page=register">Here's How.</a>
           </p>
-          <h5>
-            1 Like = 5 hours of motivation boost to continue this project xD
-          </h5>
           <div
             className="fb-like"
-            // data-href="https://vince-class-board.glitch.me/"
-            data-href={process.env.TUNNEL}
+            data-href="https://vince-class-board.glitch.me/"
+            // data-href={process.env.TUNNEL}
             data-width="30"
             data-layout="box_count"
             data-action="like"
