@@ -37,9 +37,11 @@ mongoose.connect(
         schoolUrl: { type: String, required: true },
         people: {
           officials: [],
-          students: []
+          students: {}
         },
-        courses: [],
+        coursesYearSection: [],
+        curriculum: {},
+        schedule: {},
         layout: {}
       });
 

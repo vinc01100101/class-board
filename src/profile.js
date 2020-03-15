@@ -1,5 +1,6 @@
-const React = require("react");
 module.exports = () => {
+  const React = require("react");
+  const Room = require("./profile/room")();
   require("./client-socket")();
 
   const userProfile = JSON.parse(
@@ -31,7 +32,7 @@ module.exports = () => {
       this.setState({ tabContents: sw });
     }
     componentDidMount() {
-      const tabNames = document.getElementsByClassName("tab-name");
+      const tabNames = document.getElementsByClassName("profile-tab");
       for (const props in tabNames) {
         !isNaN(parseInt(props)) &&
           tabNames[props].addEventListener("click", this.__handleTabNamesClick);
@@ -70,14 +71,14 @@ module.exports = () => {
   function TabsContainer(props) {
     return (
       <div id="tabs-container">
-        <div id="tab-names">
-          <div className="tab-name" id="c1">
+        <div className="tab-names">
+          <div className="profile-tab tab-name" id="c1">
             ROOM
           </div>
-          <div className="tab-name" id="c2">
+          <div className="profile-tab tab-name" id="c2">
             MY RECORDS
           </div>
-          <div className="tab-name" id="c3">
+          <div className="profile-tab tab-name" id="c3">
             MY SCHEDULES
           </div>
         </div>
@@ -105,13 +106,6 @@ module.exports = () => {
             Schedules Content
           </div>
         </div>
-      </div>
-    );
-  }
-  function Room() {
-    return (
-      <div>
-        <input type="text" placeholder="enter"></input>
       </div>
     );
   }

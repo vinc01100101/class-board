@@ -1,6 +1,5 @@
-const React = require("react");
-
 module.exports = () => {
+  const React = require("react");
   const schoolPageLayout = JSON.parse(
     document.getElementById("schoolPageLayout").textContent
   );

@@ -166,13 +166,15 @@ hr {
   max-width: 1000px;
   border: solid black 3px;
 }
-#tabs-container #tab-names {
+.tab-names {
+  background-color: rgb(129, 165, 212);
   width: 100%;
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
 }
-#tabs-container #tab-names .tab-name {
+.tab-name {
   width: 33%;
   border: solid black 4px;
   -webkit-touch-callout: none; /* iOS Safari */
