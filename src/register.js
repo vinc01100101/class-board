@@ -1,6 +1,5 @@
-const React = require("react");
-
 module.exports = () => {
+  const React = require("react");
   return class extends React.Component {
     constructor(props) {
       super(props);
@@ -40,7 +39,9 @@ module.exports = () => {
           <p>etc.. etc.. blah blahh agreement agreement</p>
           <p>blah blah wow you're still reading this</p>
           <label htmlFor="agree">
-            <span style={{ fontWeight: "bold" ,fontSize: 24}}>Agree and register</span>
+            <span style={{ fontWeight: "bold", fontSize: 24 }}>
+              Agree and register
+            </span>
           </label>
           <input
             id="agree"

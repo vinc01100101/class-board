@@ -93,7 +93,6 @@ module.exports = (app, passport, modelSchool, db) => {
             .select("layout")
             .exec((err, doc) => {
               renderPage(res, {
-                tunnel: process.env.TUNNEL,
                 currentPage: "homepage",
                 schools: JSON.stringify(doc.map(x => x.layout.schoolName))
               });
@@ -104,9 +103,12 @@ module.exports = (app, passport, modelSchool, db) => {
 
       case "profile":
         if (req.isAuthenticated()) {
-          renderPage(res, {
-            currentPage: "profile",
-            userProfile: uPToSend
+          dbSearchSchool(res, req.user.schoolUrl, doc => {
+            renderPage(res, {
+              currentPage: "profile",
+              userProfile: uPToSend,
+              courseList: JSON.stringify(doc.coursesYearSection)
+            });
           });
         } else {
           res.redirect("/");
@@ -480,6 +482,9 @@ module.exports = (app, passport, modelSchool, db) => {
         const schurl = req.body["school-name"]
           .toLowerCase()
           .replace(/\s/g, "_");
+
+        //DATA STRUCTURE
+        //CHANGES SHOULD BE IN ACCORDANCE WITH SCHEMA AT SERVER.JS
         const documentSchool = new modelSchool({
           username: req.body.username,
           password: hash,
@@ -504,9 +509,82 @@ module.exports = (app, passport, modelSchool, db) => {
                 }
               }
             ],
-            students: []
+            students: {
+              BSCpE: {
+                I: {
+                  "Section-A": [
+                    {
+                      id: "",
+                      firstName: "Vincent",
+                      lastName: "Toledo",
+                      username: "",
+                      password: "",
+                      schoolUrl: "",
+                      schoolName: "",
+                      subjects: []
+                    },
+                    {
+                      id: "",
+                      firstName: "Ally",
+                      lastName: "Mae",
+                      username: "",
+                      password: "",
+                      schoolUrl: "",
+                      schoolName: "",
+                      subjects: []
+                    }
+                  ],
+                  "Section-B": [
+                    {
+                      id: "",
+                      firstName: "Ben",
+                      lastName: "Yow",
+                      username: "",
+                      password: "",
+                      schoolUrl: "",
+                      schoolName: "",
+                      subjects: []
+                    },
+                    {
+                      id: "",
+                      firstName: "Danny",
+                      lastName: "Dan",
+                      username: "",
+                      password: "",
+                      schoolUrl: "",
+                      schoolName: "",
+                      subjects: []
+                    }
+                  ]
+                }
+              }
+            }
           },
-          courses: {},
+          //FOR MAPPING PURPOSE ONLY
+          coursesYearSection: [
+            [
+              "BSCpE",
+              ["Section-A", "Section-B", "Section-C"],
+              ["Section-A", "Section-B", "Section-C"],
+              ["Section-A", "Section-B", "Section-C", "Section-D"],
+              ["Section-A", "Section-B", "Section-C"],
+              ["Section-A", "Section-B", "Section-C"]
+            ],
+            [
+              "BSEcE",
+              ["Section-A", "Section-B", "Section-C", "Section-D"],
+              ["Section-A", "Section-B", "Section-C"],
+              ["Section-A", "Section-B", "Section-C", "Section-D"],
+              ["Section-A", "Section-B", "Section-C"],
+              ["Section-A", "Section-B", "Section-C", "Section-D"]
+            ]
+          ], //change everything to this. getter function
+          curriculum: {
+            Algebra: [2, ["BSCpE", "I"], ["BSEcE", "I"]],
+            Geometry: [3, ["BSCpE", "I"], ["BSEcE", "I"]],
+            Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
+          },
+          schedule: {},
           layout: {
             schoolName: req.body["school-name"],
             schoolUrl: schurl

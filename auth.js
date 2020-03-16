@@ -1,18 +1,31 @@
-const session = require("express-session");
 const LocalStrategy = require("passport-local");
 const bcrypt = require("bcryptjs");
+const session = require("express-session");
+const sessionStore = new session.MemoryStore();
+const cookieParser = require("cookie-parser");
+const passportSocketio = require("passport.socketio");
 
-module.exports = (app, passport, modelSchool) => {
+module.exports = (app, passport, modelSchool, io) => {
+  app.use(cookieParser());
   app.use(
     session({
       secret: process.env.SESSION_SECRET,
-      saveUninitialized: false,
-      resave: false
+      resave: true,
+      saveUninitialized: true,
+      key: "express.sid",
+      store: sessionStore
     })
   );
   app.use(passport.initialize());
   app.use(passport.session());
-
+  io.use(
+    passportSocketio.authorize({
+      cookieParser: cookieParser,
+      key: "express.sid",
+      secret: process.env.SESSION_SECRET,
+      store: sessionStore
+    })
+  );
   passport.serializeUser((user, done) => {
     console.log("SERIALIZING: " + JSON.stringify(user));
     done(null, { id: user.id, school: user.schoolUrl });

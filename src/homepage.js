@@ -1,5 +1,5 @@
-const React = require("react");
 module.exports = () => {
+  const React = require("react");
   return class extends React.Component {
     constructor(props) {
       super(props);
@@ -42,13 +42,10 @@ module.exports = () => {
             Your school isn't registered yet? Join us!{" "}
             <a href="/?page=register">Here's How.</a>
           </p>
-          <h5>
-            1 Like = 5 hours of motivation boost to continue this project xD
-          </h5>
           <div
             className="fb-like"
-            // data-href="https://vince-class-board.glitch.me/"
-            data-href={process.env.TUNNEL}
+            data-href="https://vince-class-board.glitch.me/"
+            // data-href={process.env.TUNNEL}
             data-width="30"
             data-layout="box_count"
             data-action="like"
@@ -101,31 +98,30 @@ module.exports = () => {
       );
     }
   };
-};
+  function FeaturesAndUpdates(props) {
+    const listFeatures = [
+      `Register a school. (register a school together with the Owner/President's
+    account/email)`,
+      `Log in an Admin Account or use a ticket of the newly created admin
+    account.`,
+      `Control Panel button.`,
+      `Create Admin Account.`,
+      `Manage Admin Accounts (hover mouse on ID's to edit accounts).`
+    ];
 
-function FeaturesAndUpdates(props) {
-  const listFeatures = [
-    `Register a school. (register a school together with the Owner/President's
-  account/email)`,
-    `Log in an Admin Account or use a ticket of the newly created admin
-  account.`,
-    `Control Panel button.`,
-    `Create Admin Account.`,
-    `Manage Admin Accounts (hover mouse on ID's to edit accounts).`
-  ];
-
-  const listUpdates = [];
-  return (
-    <div id="features-main-container">
-      <div id="secondary">
-        <h4>Currently Working Features:</h4>
-        <ol id="currently-working">
-          {listFeatures.map((x, i) => (
-            <li key={i}>{x}</li>
-          ))}
-        </ol>
+    const listUpdates = [];
+    return (
+      <div id="features-main-container">
+        <div id="secondary">
+          <h4>Currently Working Features:</h4>
+          <ol id="currently-working">
+            {listFeatures.map((x, i) => (
+              <li key={i}>{x}</li>
+            ))}
+          </ol>
+        </div>
+        <button onClick={props.onC}>CLOSE</button>
       </div>
-      <button onClick={props.onC}>CLOSE</button>
-    </div>
-  );
-}
+    );
+  }
+};
