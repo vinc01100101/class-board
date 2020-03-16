@@ -8,7 +8,7 @@ const ManageSchedules = require("./cp/manage-schedules");
 const ManageStudentsPayment = require("./cp/manage-students-payment");
 const WelcomeNewAdmin = require("./cp/welcome-new-admin");
 const ViewAndManageAdmins = require("./cp/view-and-manage-admins");
- 
+
 const ReactDOM = require("react-dom");
 const React = require("react");
 

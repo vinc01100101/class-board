@@ -1,6 +1,5 @@
-const React = require("react");
-
 module.exports = () => {
+  const React = require("react");
   const schoolPageLayout = JSON.parse(
     document.getElementById("schoolPageLayout").textContent
   );
@@ -43,8 +42,13 @@ module.exports = () => {
             id="is-ticket"
             onChange={this._checkBoxOnChange}
           />
-          <label htmlFor="is-ticket">Insert ticket code <span style={{color: 'green'}}>(for new admin accounts only)</span></label>
-          
+          <label htmlFor="is-ticket">
+            Insert ticket code{" "}
+            <span style={{ color: "green" }}>
+              (for new admin accounts only)
+            </span>
+          </label>
+
           <p style={{ color: "red" }}>{errorDom}</p>
           {!this.state.isOn ? (
             <Login _onSubmitEmail={this._onSubmitEmail} />
@@ -57,7 +61,7 @@ module.exports = () => {
           <br />
           <h4>Like this school? Smash that like button!</h4>
           <div
-            class="fb-like"
+            className="fb-like"
             data-href={
               "https://vince-class-board.glitch.me/" +
               schoolPageLayout.schoolUrl

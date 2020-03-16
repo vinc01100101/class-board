@@ -2,14 +2,23 @@ html
  head
   title ClassBoard
   meta(charset="UTF-8")
-  meta(name="viewport" content="width=device-width, initial-scale=1.0")
-  link(rel="stylesheet", href="./style.css" type='text/css')
+  meta(name="viewport", content="width=device-width, initial-scale=1.0")
+  meta(name='description', content='A school platform that helps students to become more engaged with their studies.')
+  link(rel="stylesheet", href="./style.css", type='text/css')
+  link(rel='shortcut icon', href='./favicon.ico', type='image/x-icon')
+
+
+  link(rel='canonical', href="https://vince-class-board.glitch.me")
+  meta(property='og:title', content='School platform | ClassBoard')
+  meta(property='og:site_name', content="ClassBoard")
+  meta(property='og:url', content="https://vince-class-board.glitch.me")
+  meta(property='og:description', content='A school platform that helps students to become more engaged with their studies.')
+  meta(property='og:image', content='https://cdn.glitch.com/29073cb9-628f-4341-a431-4eaa806d4a66%2Fblupes.png?1584359508289')
+
  body
   div(id="fb-root")
-  script(async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0")
+  script(async='', defer='', crossorigin='anonymous', src='https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0')
   
-  h1 Single Page
-  p(style='color:red') (Please ignore this info, I only use this for rendering reference)
   div(id='currentPage') #{currentPage}
   div(id='errorDom') #{errorDom}
   div(id='successDom') #{successDom}
@@ -18,8 +27,8 @@ html
   div(id='userProfile') #{userProfile} <!-- User's JSON-->
   div(id='schoolPageLayout') #{schoolPageLayout} <!-- SchoolPage custom style JSON-->
   div(id='listOfAdmins') #{listOfAdmins} <!-- List of admins -->
+  div(id='courseList') #{courseList} <!-- List of courses, yr, and section -->
 
-  hr
   div(id='root')
-  script(src='./gate-bundle.js' type='application/javascript')
- 
+  script(src='/socket.io/socket.io.js')
+  script(src='./gate-bundle.js', type='application/javascript')

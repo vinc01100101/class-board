@@ -7,10 +7,7 @@ module.exports = () => {
     }
 
     render() {
-      return <div>
-      Manage Schedules
-      <h1>This feature is not yet implemented. </h1>
-      </div>;
+      return <div>Not implemented yet</div>;
     }
   };
 };

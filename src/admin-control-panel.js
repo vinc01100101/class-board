@@ -1,6 +1,5 @@
-const React = require("react");
-
 module.exports = () => {
+  const React = require("react");
   const userProfile = JSON.parse(
     document.getElementById("userProfile").textContent
   );

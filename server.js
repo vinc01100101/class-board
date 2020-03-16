@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const http = require("http").Server(app);
+const io = require("socket.io")(http);
 require("dotenv").config();
 const mongoose = require("mongoose");
 const passport = require("passport");
@@ -10,11 +12,12 @@ const connEvents = require("./connection-listeners");
 const colors = require("colors");
 const routes = require("./routes");
 const auth = require("./auth");
-
+const emits = require("./emits");
+ 
 connEvents(mongoose, colors);
 
 const dburi = process.env.DB;
- 
+
 mongoose.connect(
   dburi,
   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -34,9 +37,11 @@ mongoose.connect(
         schoolUrl: { type: String, required: true },
         people: {
           officials: [],
-          students: []
+          students: {}
         },
-        courses: [],
+        coursesYearSection: [],
+        curriculum: {},
+        schedule: {},
         layout: {}
       });
 
@@ -48,12 +53,13 @@ mongoose.connect(
       app.use(express.static(__dirname + "/dist"));
       app.use(express.urlencoded({ extended: false }));
 
-      auth(app, passport, modelSchool);
+      auth(app, passport, modelSchool, io);
       routes(app, passport, modelSchool, db);
+      emits(io);
 
       const port = process.env.PORT;
 
-      app.listen(port, () => {
+      http.listen(port, () => {
         console.log(colors.cyan("listening to port: " + port));
       });
     }
