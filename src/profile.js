@@ -1,7 +1,7 @@
 module.exports = () => {
   const React = require("react");
   const Room = require("./profile/room")();
-  require("./client-socket")();
+  const clientEmits = require("./client-emits");
 
   const userProfile = JSON.parse(
     document.getElementById("userProfile").textContent
@@ -37,6 +37,8 @@ module.exports = () => {
         !isNaN(parseInt(props)) &&
           tabNames[props].addEventListener("click", this.__handleTabNamesClick);
       }
+      const socket = io();
+      clientEmits(socket);
     }
     render() {
       const errorDom = document.getElementById("errorDom").textContent;
