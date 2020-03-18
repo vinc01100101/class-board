@@ -2,6 +2,10 @@ const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
 const flash = require("connect-flash");
 
+const ROUTER_logger = require("./routes/logger"),
+  ROUTER_registerMaster = require("./routes/register-master"),
+  ROUTER_registerAdmin = require("./routes/register-admin");
+
 const hierarchy = {
   President: 5,
   "Vice President": 4,
@@ -9,6 +13,7 @@ const hierarchy = {
   Faculty: 2,
   Accountant: 2
 };
+Object.freeze(hierarchy);
 
 const renderPage = (res, props) => {
   res.render(__dirname + "/dist/index.pug", props);
@@ -50,21 +55,8 @@ module.exports = (app, passport, modelSchool, db) => {
         )
       : next();
   });
-  app.use((req, res, next) => {
-    console.log(
-      "_____________________" +
-        "\nMETHOD: " +
-        req.method +
-        "\nPATH: " +
-        req.path +
-        "\nIP: " +
-        (req.ip || req.connection.remoteAddress) +
-        "\nBrowser: " +
-        req.headers["user-agent"]
-    );
-    next();
-  });
 
+  app.use("/", ROUTER_logger);
   //for Query Url
   app.get("/", (req, res) => {
     console.log("QUERY URL: " + req.query.page);
@@ -81,7 +73,6 @@ module.exports = (app, passport, modelSchool, db) => {
         permissions: req.user.permissions,
         schoolUrl: req.user.schoolUrl
       });
-    console.log(member);
     switch (req.query.page) {
       case "homepage":
       case undefined:
@@ -239,6 +230,7 @@ module.exports = (app, passport, modelSchool, db) => {
         res.send("Page Not Found.");
     }
   });
+
   app.get("/logout", (req, res, next) => {
     console.log("LOGGING OUT " + JSON.stringify(req.user));
     const sch = req.user ? req.user.schoolUrl : null;
@@ -259,7 +251,6 @@ module.exports = (app, passport, modelSchool, db) => {
   //for School URL Params
   app.get("/:schparams", (req, res) => {
     if (req.isAuthenticated()) {
-      console.log("PARAAAAAMS: " + req.params.schparams);
       res.redirect("/?page=profile");
     } else {
       req.params.schparams != "favicon.ico" &&
@@ -465,217 +456,23 @@ module.exports = (app, passport, modelSchool, db) => {
     );
   });
 
-  app.post("/register-master", (req, res) => {
-    const schurl = req.body["school-name"].toLowerCase().replace(/\s/g, "_");
-    modelSchool.findOne({ schoolUrl: schurl }, (err, doc) => {
-      if (err) {
-        console.log("Db 'findOne' Error: " + err);
-        res.status("500").send("Server error 500");
-      } else if (doc) {
-        renderPage(res, {
-          currentPage: "register",
-          errorDom: `School name "${req.body["school-name"]}" already exist`
-        });
-      } else {
-        const hash = bcrypt.hashSync(req.body.password, 12);
-        const uuid = uuidv4();
-        const schurl = req.body["school-name"]
-          .toLowerCase()
-          .replace(/\s/g, "_");
+  app.use(
+    "/register-master",
+    (req, res, next) => {
+      req.modelSchool = modelSchool;
+      req.renderPage = renderPage;
+      next();
+    },
+    ROUTER_registerMaster
+  );
 
-        //DATA STRUCTURE
-        //CHANGES SHOULD BE IN ACCORDANCE WITH SCHEMA AT SERVER.JS
-        const documentSchool = new modelSchool({
-          username: req.body.username,
-          password: hash,
-          schoolUrl: schurl,
-          ownerFirstName: req.body["first-name"],
-          ownerLastName: req.body["last-name"],
-          people: {
-            officials: [
-              {
-                id: "officials-" + uuid,
-                firstName: req.body["first-name"],
-                lastName: req.body["last-name"],
-                position: "President",
-                username: req.body.username,
-                password: hash,
-                schoolUrl: schurl,
-                schoolName: req.body["school-name"],
-                permissions: {
-                  manageSchedule: true,
-                  manageStudentsPayment: true,
-                  manageAdminAccounts: true
-                }
-              }
-            ],
-            students: {
-              BSCpE: {
-                I: {
-                  "Section-A": [
-                    {
-                      id: "",
-                      firstName: "Vincent",
-                      lastName: "Toledo",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    },
-                    {
-                      id: "",
-                      firstName: "Ally",
-                      lastName: "Mae",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    }
-                  ],
-                  "Section-B": [
-                    {
-                      id: "",
-                      firstName: "Ben",
-                      lastName: "Yow",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    },
-                    {
-                      id: "",
-                      firstName: "Danny",
-                      lastName: "Dan",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          //FOR MAPPING PURPOSE ONLY
-          coursesYearSection: [
-            [
-              "BSCpE",
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C"]
-            ],
-            [
-              "BSEcE",
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"]
-            ]
-          ], //change everything to this. getter function
-          curriculum: {
-            Algebra: [2, ["BSCpE", "I"], ["BSEcE", "I"]],
-            Geometry: [3, ["BSCpE", "I"], ["BSEcE", "I"]],
-            Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
-          },
-          schedule: {},
-          layout: {
-            schoolName: req.body["school-name"],
-            schoolUrl: schurl
-          }
-        });
-        documentSchool.save((err, doc) => {
-          if (err) {
-            console.log("Registration Error: " + err);
-            res.status("500").send("Database Error");
-          } else {
-            console.log("Registration Successful.");
-            renderPage(res, {
-              currentPage: "register",
-              successDom: "Success!"
-            });
-          }
-        });
-      }
-    });
-  });
-
-  app.post("/register-admin", (req, res) => {
-    const uuid = uuidv4();
-    modelSchool
-      .findOne({ schoolUrl: req.user.schoolUrl })
-      .select("people")
-      .exec((err, doc) => {
-        if (err) {
-          console.log("Database Error: " + err);
-          res.send("DATABASE ERROR");
-        } else if (!doc) {
-          console.log("Unexpected error: School name doesn't exist");
-          res.send("Server error");
-        } else {
-          const isExisting = doc.people.officials.filter(
-            x => x.username == req.body.username
-          )[0];
-          console.log("IS EXISTING?: " + isExisting);
-          if (isExisting) {
-            console.log("Email already exists.");
-            renderPage(res, {
-              currentPage: "create-admin",
-              errorDom: "Email already exists."
-            });
-          } else {
-            const ticket = "ticket-" + uuidv4();
-            doc.people.officials.push({
-              id: "officials-" + uuid,
-              firstName: req.body["first-name"],
-              lastName: req.body["last-name"],
-              position: req.body.position,
-              username: req.body.username,
-              password: ticket,
-              schoolUrl: req.user.schoolUrl,
-              schoolName: req.user.schoolName,
-              permissions: {
-                manageSchedule: !!req.body.sched,
-                manageStudentsPayment: !!req.body.payment,
-                manageAdminAccounts: !!req.body["admin-accounts"]
-              }
-            });
-            modelSchool.findOneAndUpdate(
-              { schoolUrl: req.user.schoolUrl },
-              doc,
-              (err, done) => {
-                if (err) {
-                  console.log("Error on findOneAndUpdate: " + err);
-                  res.send("Server Database Error");
-                } else {
-                  console.log(done);
-                  const ticketString =
-                    "<h4>Ticket code for " +
-                    req.body["first-name"] +
-                    " " +
-                    req.body["last-name"] +
-                    " has been generated" +
-                    "<br>Please keep this somewhere safe." +
-                    "<br>This can only be used once.<br><br>" +
-                    req.body.username +
-                    "|" +
-                    req.body.position +
-                    "<br>" +
-                    ticket +
-                    "</h4><a href='/'>Back</a>";
-
-                  res.send(ticketString);
-                }
-              }
-            );
-          }
-        }
-      });
-  });
+  app.use(
+    "/register-admin",
+    (req, res, next) => {
+      req.modelSchool = modelSchool;
+      req.renderPage = renderPage;
+      next();
+    },
+    ROUTER_registerAdmin
+  );
 };

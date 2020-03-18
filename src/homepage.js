@@ -57,8 +57,8 @@ module.exports = () => {
           {/*---------DEVELOPMENT-----------*/}
           <div
             style={{
-              color: "green",
-              border: "green solid 3px",
+              color: "lightgreen",
+              border: "lightgreen solid 3px",
               width: "300px"
             }}
           >
@@ -87,7 +87,7 @@ module.exports = () => {
             <br />
             <br />
             <a href="/api/drop-collection">
-              <span style={{ color: "red" }}>
+              <span style={{ color: "rgb(209, 71, 53)" }}>
                 Delete Collections From Database(Development Mode Only)
               </span>
             </a>

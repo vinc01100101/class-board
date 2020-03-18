@@ -20,6 +20,8 @@ module.exports = () => {
       this._courseChange = this._courseChange.bind(this);
       this._sectionChange = this._sectionChange.bind(this);
       this.__handleTabShift2 = this.__handleTabShift2.bind(this);
+      this.__connect = this.__connect.bind(this);
+      this.__sendChat = this.__sendChat.bind(this);
     }
 
     componentDidMount() {
@@ -67,6 +69,15 @@ module.exports = () => {
         tabContents: sw
       });
     }
+    __connect() {
+      const toSend = {
+        course: this.state.course,
+        yr: this.state.yr,
+        section: this.state.section
+      };
+    }
+
+    __sendChat() {}
     render() {
       return (
         <div>
@@ -74,6 +85,7 @@ module.exports = () => {
             _courseChange={this._courseChange}
             _yrChange={this._yrChange}
             _sectionChange={this._sectionChange}
+            __connect={this.__connect}
             course={this.state.course}
             yr={this.state.yr}
             section={this.state.section}
@@ -100,6 +112,9 @@ module.exports = () => {
               style={{ display: this.state.tabContents.cc2 }}
             >
               <h1>CHAT</h1>
+              <div id="chat-content" />
+              <textarea id="user-input" />
+              <button onClick={this.__sendChat}>Send</button>
             </div>
           </div>
         </div>
@@ -158,7 +173,11 @@ module.exports = () => {
               [props.yr].map((x, i) => <option key={i}>{x}</option>)}
         </select>
         {/*enter-room button*/}
-        <button id="enter" disabled={!!!props.section}>
+        <button
+          id="enter"
+          disabled={!!!props.section}
+          onClick={props.__connect}
+        >
           Enter room
         </button>
       </div>
