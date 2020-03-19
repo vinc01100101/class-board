@@ -111,8 +111,8 @@ module.exports = () => {
 
     const listUpdates = [];
     return (
-      <div id="features-main-container">
-        <div id="secondary">
+      <div className="popup-background">
+        <div className="popup-content" id="features">
           <h4>Currently Working Features:</h4>
           <ol id="currently-working">
             {listFeatures.map((x, i) => (

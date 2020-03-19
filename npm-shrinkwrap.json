@@ -1788,6 +1788,14 @@
       "integrity": "sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=",
       "dev": true
     },
+    "busboy": {
+      "version": "0.3.1",
+      "resolved": "https://registry.npmjs.org/busboy/-/busboy-0.3.1.tgz",
+      "integrity": "sha512-y7tTxhGKXcyBxRKAni+awqx8uqaJKrSFSNFSeRG5CsWNdmy2BIK+6VGWEW7TZnIO/533mtMEA4rOevQV815YJw==",
+      "requires": {
+        "dicer": "0.3.0"
+      }
+    },
     "bytes": {
       "version": "3.1.0",
       "resolved": "https://registry.npmjs.org/bytes/-/bytes-3.1.0.tgz",
@@ -2364,6 +2372,14 @@
       "integrity": "sha1-8NZtA2cqglyxtzvbP+YjEMjlUrc=",
       "dev": true
     },
+    "dicer": {
+      "version": "0.3.0",
+      "resolved": "https://registry.npmjs.org/dicer/-/dicer-0.3.0.tgz",
+      "integrity": "sha512-MdceRRWqltEG2dZqO769g27N/3PXfcKl04VhYnBlo2YhH7zPi88VebsjTKclaOyiuMaGU72hTfw3VkUitGcVCA==",
+      "requires": {
+        "streamsearch": "0.1.2"
+      }
+    },
     "diffie-hellman": {
       "version": "5.0.3",
       "resolved": "https://registry.npmjs.org/diffie-hellman/-/diffie-hellman-5.0.3.tgz",
@@ -2736,6 +2752,14 @@
         "vary": "~1.1.2"
       }
     },
+    "express-fileupload": {
+      "version": "1.1.6",
+      "resolved": "https://registry.npmjs.org/express-fileupload/-/express-fileupload-1.1.6.tgz",
+      "integrity": "sha512-w24zPWT8DkoIxSVkbxYPo9hkTiLpCQQzNsLRTCnecBhfbYv+IkIC5uLw2MIUAxBZ+7UMmXPjGxlhzUXo4RcbZw==",
+      "requires": {
+        "busboy": "^0.3.1"
+      }
+    },
     "express-session": {
       "version": "1.17.0",
       "resolved": "https://registry.npmjs.org/express-session/-/express-session-1.17.0.tgz",
@@ -2872,6 +2896,23 @@
       "resolved": "https://registry.npmjs.org/figgy-pudding/-/figgy-pudding-3.5.1.tgz",
       "integrity": "sha512-vNKxJHTEKNThjfrdJwHc7brvM6eVevuO5nTj6ez8ZQ1qbXTvGthucRF7S4vf2cr71QVnT70V34v0S1DyQsti0w==",
       "dev": true
+    },
+    "file-match": {
+      "version": "1.0.2",
+      "resolved": "https://registry.npmjs.org/file-match/-/file-match-1.0.2.tgz",
+      "integrity": "sha1-ycrSZdLIrfOoFHWw30dYWQafrvc=",
+      "requires": {
+        "utils-extend": "^1.0.6"
+      }
+    },
+    "file-system": {
+      "version": "2.2.2",
+      "resolved": "https://registry.npmjs.org/file-system/-/file-system-2.2.2.tgz",
+      "integrity": "sha1-fWWDPjojR9zZVqgTxncVPtPt2Yc=",
+      "requires": {
+        "file-match": "^1.0.1",
+        "utils-extend": "^1.0.4"
+      }
     },
     "file-uri-to-path": {
       "version": "1.0.0",
@@ -6103,6 +6144,11 @@
       "integrity": "sha512-AiisoFqQ0vbGcZgQPY1cdP2I76glaVA/RauYR4G4thNFgkTqr90yXTo4LYX60Jl+sIlPNHHdGSwo01AvbKUSVQ==",
       "dev": true
     },
+    "streamsearch": {
+      "version": "0.1.2",
+      "resolved": "https://registry.npmjs.org/streamsearch/-/streamsearch-0.1.2.tgz",
+      "integrity": "sha1-gIudDlb8Jz2Am6VzOOkpkZoanxo="
+    },
     "string-width": {
       "version": "3.1.0",
       "resolved": "https://registry.npmjs.org/string-width/-/string-width-3.1.0.tgz",
@@ -6475,6 +6521,11 @@
       "version": "1.0.2",
       "resolved": "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz",
       "integrity": "sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8="
+    },
+    "utils-extend": {
+      "version": "1.0.8",
+      "resolved": "https://registry.npmjs.org/utils-extend/-/utils-extend-1.0.8.tgz",
+      "integrity": "sha1-zP17ZFQPjpDuIe7Fd2nQZRyril8="
     },
     "utils-merge": {
       "version": "1.0.1",

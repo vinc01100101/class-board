@@ -1,5 +1,8 @@
 module.exports = () => {
-  const React = require("react");
+  const React = require("react"),
+    socket = io(),
+    clientEmitsListener = require("./client-emits-listener");
+
   const raw = JSON.parse(document.getElementById("courseList").textContent);
   const courseList = raw.map(x => x[0]);
   let courseDom, yrDom, sectionDom, enterDom;
@@ -14,7 +17,9 @@ module.exports = () => {
         tabContents: {
           cc1: "none",
           cc2: "none"
-        }
+        },
+        postInput: "",
+        posts: []
       };
       this._yrChange = this._yrChange.bind(this);
       this._courseChange = this._courseChange.bind(this);
@@ -22,6 +27,9 @@ module.exports = () => {
       this.__handleTabShift2 = this.__handleTabShift2.bind(this);
       this.__connect = this.__connect.bind(this);
       this.__sendChat = this.__sendChat.bind(this);
+      this._postInput = this._postInput.bind(this);
+      this._postOnClick = this._postOnClick.bind(this);
+      this._emitsCallback = this._emitsCallback.bind(this);
     }
 
     componentDidMount() {
@@ -35,8 +43,14 @@ module.exports = () => {
         !isNaN(parseInt(props)) &&
           tabNames[props].addEventListener("click", this.__handleTabShift2);
       }
-    }
 
+      clientEmitsListener(socket, this._emitsCallback); //start listening to emits
+    }
+    _emitsCallback(p) {
+      this.setState({
+        posts: p
+      });
+    }
     _courseChange(e) {
       yrDom.value = "zero";
       sectionDom.value = "zero";
@@ -70,14 +84,26 @@ module.exports = () => {
       });
     }
     __connect() {
-      const toSend = {
+      const roomDetail = {
         course: this.state.course,
         yr: this.state.yr,
         section: this.state.section
       };
+      socket.emit("connect to room", roomDetail);
     }
 
     __sendChat() {}
+    _postInput(e) {
+      this.setState({
+        postInput: e.target.value
+      });
+    }
+    _postOnClick() {
+      socket.emit("post", this.state.postInput);
+      this.setState({
+        postInput: ""
+      });
+    }
     render() {
       return (
         <div>
@@ -105,6 +131,15 @@ module.exports = () => {
               style={{ display: this.state.tabContents.cc1 }}
             >
               <h1>POST</h1>
+              <div id="posts-content">
+                {this.state.posts.length > 0 &&
+                  this.state.posts.map((x, i) => <p key={i}>{x}</p>)}
+              </div>
+              <textarea
+                onChange={this._postInput}
+                value={this.state.postInput}
+              />
+              <button onClick={this._postOnClick}>POST</button>
             </div>
             <div
               className="tab-content-2"

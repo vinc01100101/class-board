@@ -1,4 +1,5 @@
-const express = require("express");
+const express = require("express"),
+  fileUpload = require("express-fileupload");
 const app = express();
 const http = require("http").Server(app);
 
@@ -47,6 +48,7 @@ mongoose.connect(
         coursesYearSection: [],
         curriculum: {},
         schedule: {},
+        posts: {},
         layout: {}
       });
 
@@ -58,8 +60,13 @@ mongoose.connect(
       app.use(express.static(__dirname + "/dist"));
       app.use(express.urlencoded({ extended: false }));
       app.use(express.json());
+      app.use(
+        fileUpload({
+          limits: { fileSize: 50 * 1024 * 1024 }
+        })
+      );
 
-      emits(io);
+      emits(modelSchool, io);
       auth(app, passport, modelSchool, io);
       routes(app, passport, modelSchool, db);
 

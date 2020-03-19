@@ -30,6 +30,7 @@ router.post("/", (req, res) => {
           officials: [
             {
               id: "officials-" + uuid,
+              img: "/img/default.jpg",
               firstName: req.body["first-name"],
               lastName: req.body["last-name"],
               position: "President",
@@ -120,6 +121,9 @@ router.post("/", (req, res) => {
           Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
         },
         schedule: {},
+        posts: {
+          "amcn/BSCpE/1/Section-A": ["heyhey section A!!"]
+        },
         layout: {
           schoolName: req.body["school-name"],
           schoolUrl: schurl
