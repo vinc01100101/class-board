@@ -27,6 +27,7 @@ router.post("/", (req, res) => {
           const ticket = "ticket-" + uuidv4();
           doc.people.officials.push({
             id: "officials-" + uuid,
+            img: "/img/default.jpg",
             firstName: req.body["first-name"],
             lastName: req.body["last-name"],
             position: req.body.position,
