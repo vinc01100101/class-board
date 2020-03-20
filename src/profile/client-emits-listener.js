@@ -4,8 +4,11 @@ module.exports = (socket, setState) => {
   });
 
   socket.on("render posts", posts => {
-    console.log(posts);
     setState(posts);
+    const actualPostsContainer = document.getElementById(
+      "actual-posts-container"
+    );
+    actualPostsContainer.scrollTop = actualPostsContainer.scrollHeight;
   });
   socket.on("error", error => {
     console.log("SOCKET ERROR: " + error);

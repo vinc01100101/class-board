@@ -125,8 +125,9 @@ module.exports = () => {
   }
   function TabsContainer(props) {
     return (
-      <div id="tabs-container">
+      <div id="profile-tabs-container">
         <div className="tab-names">
+          {/*className profile-tab for adding listeners purpose in componentDidMount()*/}
           <div className="profile-tab tab-name" id="c1">
             ROOM
           </div>
@@ -137,29 +138,21 @@ module.exports = () => {
             MY SCHEDULES
           </div>
         </div>
-        <div id="tab-content-container">
-          <div
-            className="tab-content"
-            id="content-room"
-            style={{ display: props.tabContents.c1 }}
-          >
-            Room Content
-            <Room />
-          </div>
-          <div
-            className="tab-content"
-            id="content-my-records"
-            style={{ display: props.tabContents.c2 }}
-          >
-            Records Content
-          </div>
-          <div
-            className="tab-content"
-            id="content-my-schedules"
-            style={{ display: props.tabContents.c3 }}
-          >
-            Schedules Content
-          </div>
+
+        {/*ROOM CONTENT*/}
+        <div className="tab-content" style={{ display: props.tabContents.c1 }}>
+          Room Content
+          <Room schoolUrl={userProfile.schoolUrl} />
+        </div>
+
+        {/*MYRECORDS CONTENT*/}
+        <div className="tab-content" style={{ display: props.tabContents.c2 }}>
+          Records Content
+        </div>
+
+        {/*MYSCHEDULES CONTENT*/}
+        <div className="tab-content" style={{ display: props.tabContents.c3 }}>
+          Schedules Content
         </div>
       </div>
     );

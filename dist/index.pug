@@ -2,7 +2,7 @@ html
  head
   title ClassBoard
   meta(charset="UTF-8")
-  meta(name="viewport", content="width=device-width, initial-scale=1.0")
+  meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no")
   meta(name='description', content='A school platform that helps students to become more engaged with their studies.')
   link(rel="stylesheet", href="./style.css", type='text/css')
   link(rel='shortcut icon', href='./favicon.ico', type='image/x-icon')
@@ -18,16 +18,16 @@ html
  body
   div(id="fb-root")
   script(async='', defer='', crossorigin='anonymous', src='https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v6.0')
-  
-  div(id='currentPage') #{currentPage}
-  div(id='errorDom') #{errorDom}
-  div(id='successDom') #{successDom}
-  div(id='schools') #{schools}<!-- Homepage School List JSON-->
-  
-  div(id='userProfile') #{userProfile} <!-- User's JSON-->
-  div(id='schoolPageLayout') #{schoolPageLayout} <!-- SchoolPage custom style JSON-->
-  div(id='listOfAdmins') #{listOfAdmins} <!-- List of admins -->
-  div(id='courseList') #{courseList} <!-- List of courses, yr, and section -->
+  div(id='variables')
+    div(id='currentPage') #{currentPage}
+    div(id='errorDom') #{errorDom}
+    div(id='successDom') #{successDom}
+    div(id='schools') #{schools}<!-- Homepage School List JSON-->
+    
+    div(id='userProfile') #{userProfile} <!-- User's JSON-->
+    div(id='schoolPageLayout') #{schoolPageLayout} <!-- SchoolPage custom style JSON-->
+    div(id='listOfAdmins') #{listOfAdmins} <!-- List of admins -->
+    div(id='courseList') #{courseList} <!-- List of courses, yr, and section -->
 
   div(id='root')
   script(src='/socket.io/socket.io.js')

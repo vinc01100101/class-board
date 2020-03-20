@@ -54,8 +54,8 @@ module.exports = (modelSchool, io) => {
                     " has entered the room " +
                     room
                 );
-                console.log(socket.id);
-                socket.emit("render posts", doc.posts[room] || [""]);
+
+                socket.emit("render posts", doc.posts[room] || "");
               }
             } else {
               console.log("Room not found");
@@ -64,22 +64,36 @@ module.exports = (modelSchool, io) => {
           }
         });
     });
-
+    //On User post to room
     socket.on("post", post => {
       const room = Object.keys(socket.rooms)[1];
+      //locate the posts property in db
       modelSchool
         .findOne({ schoolUrl: socket.request.user.schoolUrl })
         .select("posts")
         .exec((err, doc) => {
+          if (err) socket.emit("log", err);
+          const user = socket.request.user;
+          const postStructure = {
+            id: user.id,
+            name: user.firstName + " " + user.lastName,
+            post: post,
+            date: new Date().getTime()
+          };
+          //if posts.room exists, (push). if not, (create)
           doc.posts[room]
-            ? doc.posts[room].push(post)
-            : (doc.posts[room] = [post]);
+            ? doc.posts[room].push(postStructure)
+            : (doc.posts[room] = [postStructure]);
+          /*mongoose doesnt have track to this room,
+            tell it that this is modified*/
           doc.markModified("posts." + room);
+          //save the new modified doc
           doc.save((err, result) => {
             if (err) {
               console.log("Error: " + err);
               socket.emit("log", err);
             } else {
+              //re-render posts window to everyone in that room
               io.in(room).emit("render posts", result.posts[room]);
             }
           });

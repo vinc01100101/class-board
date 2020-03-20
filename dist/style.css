@@ -1,3 +1,16 @@
+html {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  -webkit-box-sizing: inherit;
+  -moz-box-sizing: inherit;
+  box-sizing: inherit;
+}
+
 body {
   overflow-wrap: break-word;
   background-color: rgb(31, 31, 31);
@@ -20,6 +33,11 @@ hr {
 .tabcontent {
   display: none;
 }
+#variables {
+  width: 1px;
+  height: 1px;
+  display: none;
+}
 #schools,
 #userProfile,
 #schoolPageLayout,
@@ -28,7 +46,7 @@ hr {
 #currentPage,
 #errorDom,
 #successDom {
-  visibility: hidden;
+  display: none;
   position: absolute;
   left: 0px;
   top: 0px;
@@ -174,9 +192,11 @@ hr {
   align-items: center;
 }
 
-#tabs-container {
-  max-width: 1000px;
-  border: solid black 3px;
+#profile-tabs-container {
+  width: 100%;
+  height: auto;
+  border: solid rgb(0, 11, 48) 3px;
+  background-color: black;
 }
 .tab-names {
   background-color: rgb(129, 165, 212);
@@ -187,6 +207,8 @@ hr {
   justify-content: center;
 }
 .tab-name {
+  color: black;
+  font-weight: bolder;
   width: 33%;
   border: solid black 4px;
   -webkit-touch-callout: none; /* iOS Safari */
@@ -197,30 +219,53 @@ hr {
   user-select: none; /* Non-prefixed version, currently
                                 supported by Chrome, Opera and Firefox */
 }
-
-#tab-content-container {
-  width: 100%;
-  height: 500px;
-}
-
-#tab-content-container .tab-content {
-  width: 100%;
-  height: 100%;
-  display: none;
-}
-.tab-content-2 {
+.tab-content {
   width: 100%;
   height: auto;
-  background-color: skyblue;
 }
-
-.tab-content-2 #chat-content {
-  width: 80%;
-  height: 300px;
-  background-color: snow;
+.tab-content #room-content {
+  width: 100%;
+  height: auto;
+}
+.tab-content #room-content #post-content {
+  width: 100%;
+  height: auto;
+}
+.tab-content #room-content #post-content #actual-posts-container {
   overflow-y: scroll;
+  height: 390px;
+  width: 100%;
+  background-color: rgb(46, 46, 46);
+}
+#post-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+}
+#post-input textarea {
+  resize: none;
+  height: 50px;
+  width: 90%;
+  margin-top: 10px;
+}
+#chat-content {
+  width: 100%;
+  /* height: fit-content; */
+  background-color: rgb(39, 39, 39);
+}
+#room-select {
+  margin: 20px;
 }
 .dp {
   width: 100px;
   height: 100px;
+}
+.postDiv {
+  width: 100%;
+  background-color: rgb(90, 87, 83);
+}
+.postImg {
+  width: 50px;
+  height: 50px;
 }

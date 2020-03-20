@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const { v4: uuidv4 } = require("uuid");
+const fs = require("file-system");
 
 router.post("/", (req, res) => {
   const uuid = uuidv4();
@@ -27,7 +28,13 @@ router.post("/", (req, res) => {
           const ticket = "ticket-" + uuidv4();
           doc.people.officials.push({
             id: "officials-" + uuid,
-            img: "/img/default.jpg",
+            img:
+              "/img/users/" +
+              req.user.schoolUrl +
+              "/" +
+              "officials-" +
+              uuid +
+              ".jpg",
             firstName: req.body["first-name"],
             lastName: req.body["last-name"],
             position: req.body.position,
@@ -64,6 +71,15 @@ router.post("/", (req, res) => {
                   ticket +
                   "</h4><a href='/'>Back</a>";
 
+                fs.copyFile(
+                  "./dist/img/default.jpg",
+                  "./dist/img/users/" +
+                    req.user.schoolUrl +
+                    "/" +
+                    "officials-" +
+                    uuid +
+                    ".jpg"
+                );
                 res.send(ticketString);
               }
             }
