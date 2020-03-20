@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require("uuid");
+const fs = require("file-system");
 
 router.post("/", (req, res) => {
   const schurl = req.body["school-name"].toLowerCase().replace(/\s/g, "_");
@@ -30,7 +31,7 @@ router.post("/", (req, res) => {
           officials: [
             {
               id: "officials-" + uuid,
-              img: "/img/default.jpg",
+              img: "/img/users/" + schurl + "/" + "officials-" + uuid + ".jpg",
               firstName: req.body["first-name"],
               lastName: req.body["last-name"],
               position: "President",
@@ -120,10 +121,8 @@ router.post("/", (req, res) => {
           Geometry: [3, ["BSCpE", "I"], ["BSEcE", "I"]],
           Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
         },
-        schedule: {},
-        posts: {
-          "amcn/BSCpE/1/Section-A": ["heyhey section A!!"]
-        },
+        schedule: { "": "" }, //empty {} will not read by mongoose
+        posts: { "": "" },
         layout: {
           schoolName: req.body["school-name"],
           schoolUrl: schurl
@@ -134,6 +133,10 @@ router.post("/", (req, res) => {
           console.log("Registration Error: " + err);
           res.status("500").send("Database Error");
         } else {
+          fs.copyFile(
+            "./dist/img/default.jpg",
+            "./dist/img/users/" + schurl + "/" + "officials-" + uuid + ".jpg"
+          );
           console.log("Registration Successful.");
           req.renderPage(res, {
             currentPage: "register",

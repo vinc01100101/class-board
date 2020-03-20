@@ -247,8 +247,17 @@ module.exports = (app, passport, modelSchool, db) => {
 
   app.get("/api/drop-collection", (req, res) => {
     db.collection("schools").drop((err, delOK) => {
-      if (err) console.log(err);
+      if (err) {
+        console.log("Deletion failed: " + err);
+        return res.status(500).send("No collection to delete");
+      }
       if (delOK) console.log("Collection Deleted.");
+      const dir = "./dist/img/users";
+      try {
+        fs.rmdirSync(dir);
+      } catch (e) {
+        console.log("Failed to remove directory " + dir);
+      }
 
       res.redirect("/");
     });
@@ -353,7 +362,7 @@ module.exports = (app, passport, modelSchool, db) => {
     });
   });
 
-  //Admin Update Account
+  //Update Account (ADMIN ACCOUNTS ONLY)
   app.post("/update-account", (req, res) => {
     dbSearchSchool(res, req.user.schoolUrl, doc => {
       let ind = -1;
@@ -439,6 +448,19 @@ module.exports = (app, passport, modelSchool, db) => {
             console.log("Delete Failed");
             res.send("Server Database Failed");
           } else {
+            const dir =
+              "./dist/img/users/" +
+              req.user.schoolUrl +
+              "/" +
+              req.body["idofaccount-to-delete"] +
+              ".jpg";
+
+            try {
+              fs.unlinkSync(dir);
+            } catch (e) {
+              console.log("Failed to delete file: " + dir);
+            }
+
             const hash = bcrypt.hashSync("delete", 1);
             res.redirect("/?page=view-and-manage-admins&success=" + hash);
           }
