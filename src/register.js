@@ -105,6 +105,7 @@ module.exports = () => {
           <label htmlFor="school-name">School name: </label>
           <input
             type="text"
+            maxlength='30'
             id="school-name"
             name="school-name"
             placeholder="School Name"
