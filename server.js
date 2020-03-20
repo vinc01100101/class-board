@@ -1,26 +1,32 @@
-const express = require("express");
+const express = require("express"),
+  fileUpload = require("express-fileupload");
 const app = express();
 const http = require("http").Server(app);
-const io = require("socket.io")(http);
+
+const io = require("socket.io")(http),
+  emits = require("./server-emits");
+
 require("dotenv").config();
 const mongoose = require("mongoose");
 const passport = require("passport");
-//const ObjectID = require("mongodb").ObjectID;
-
-const connEvents = require("./connection-listeners");
 
 const colors = require("colors");
-const routes = require("./routes");
-const auth = require("./auth");
-const emits = require("./emits");
- 
-connEvents(mongoose, colors);
+const routes = require("./routes"),
+  auth = require("./auth"),
+  connEvents = require("./connection-listeners");
+
+connEvents(mongoose, colors); //connection listeners
 
 const dburi = process.env.DB;
 
 mongoose.connect(
   dburi,
-  { useNewUrlParser: true, useUnifiedTopology: true },
+  {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false
+  },
   (err, db) => {
     if (err) {
       console.log("DATABASE ERROR: " + err);
@@ -42,6 +48,7 @@ mongoose.connect(
         coursesYearSection: [],
         curriculum: {},
         schedule: {},
+        posts: {},
         layout: {}
       });
 
@@ -52,10 +59,16 @@ mongoose.connect(
       app.set("view engine", "pug");
       app.use(express.static(__dirname + "/dist"));
       app.use(express.urlencoded({ extended: false }));
+      app.use(express.json());
+      app.use(
+        fileUpload({
+          limits: { fileSize: 50 * 1024 * 1024 }
+        })
+      );
 
+      emits(modelSchool, io);
       auth(app, passport, modelSchool, io);
       routes(app, passport, modelSchool, db);
-      emits(io);
 
       const port = process.env.PORT;
 

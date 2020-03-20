@@ -1,6 +1,11 @@
 const bcrypt = require("bcryptjs");
-const { v4: uuidv4 } = require("uuid");
+// const { v4: uuidv4 } = require("uuid");
 const flash = require("connect-flash");
+const fs = require("file-system");
+
+const ROUTER_logger = require("./routes/logger"),
+  ROUTER_registerMaster = require("./routes/register-master"),
+  ROUTER_registerAdmin = require("./routes/register-admin");
 
 const hierarchy = {
   President: 5,
@@ -9,6 +14,7 @@ const hierarchy = {
   Faculty: 2,
   Accountant: 2
 };
+Object.freeze(hierarchy);
 
 const renderPage = (res, props) => {
   res.render(__dirname + "/dist/index.pug", props);
@@ -50,21 +56,8 @@ module.exports = (app, passport, modelSchool, db) => {
         )
       : next();
   });
-  app.use((req, res, next) => {
-    console.log(
-      "_____________________" +
-        "\nMETHOD: " +
-        req.method +
-        "\nPATH: " +
-        req.path +
-        "\nIP: " +
-        (req.ip || req.connection.remoteAddress) +
-        "\nBrowser: " +
-        req.headers["user-agent"]
-    );
-    next();
-  });
 
+  app.use("/", ROUTER_logger);
   //for Query Url
   app.get("/", (req, res) => {
     console.log("QUERY URL: " + req.query.page);
@@ -75,13 +68,13 @@ module.exports = (app, passport, modelSchool, db) => {
       JSON.stringify({
         firstName: req.user.firstName,
         lastName: req.user.lastName,
+        img: req.user.img,
         member: member,
         position: req.user.position,
         schoolName: req.user.schoolName,
         permissions: req.user.permissions,
         schoolUrl: req.user.schoolUrl
       });
-    console.log(member);
     switch (req.query.page) {
       case "homepage":
       case undefined:
@@ -220,10 +213,14 @@ module.exports = (app, passport, modelSchool, db) => {
                 getListOfAdmins(doc.people.officials)
               ),
               userProfile: uPToSend,
-              successDom:
-                req.query.success &&
-                bcrypt.compareSync("true", req.query.success) &&
-                "Update Successful",
+              successDom: (() => {
+                if (req.query.success) {
+                  if (bcrypt.compareSync("true", req.query.success))
+                    return "Update Successful";
+                  if (bcrypt.compareSync("delete", req.query.success))
+                    return "Account Deletion Successful";
+                }
+              })(),
               errorDom:
                 req.query.error &&
                 bcrypt.compareSync("true", req.query.error) &&
@@ -239,6 +236,7 @@ module.exports = (app, passport, modelSchool, db) => {
         res.send("Page Not Found.");
     }
   });
+
   app.get("/logout", (req, res, next) => {
     console.log("LOGGING OUT " + JSON.stringify(req.user));
     const sch = req.user ? req.user.schoolUrl : null;
@@ -248,23 +246,26 @@ module.exports = (app, passport, modelSchool, db) => {
   });
 
   app.get("/api/drop-collection", (req, res) => {
-    try{
-      db.collection("schools").drop((err, delOK) => {
-      if (err) console.log(err);
+    db.collection("schools").drop((err, delOK) => {
+      if (err) {
+        console.log("Deletion failed: " + err);
+        return res.status(500).send("No collection to delete");
+      }
       if (delOK) console.log("Collection Deleted.");
+      const dir = "./dist/img/users";
+      try {
+        fs.rmdirSync(dir);
+      } catch (e) {
+        console.log("Failed to remove directory " + dir);
+      }
 
       res.redirect("/");
     });
-    }catch(e){
-      console.log("Collection deletion failed")
-    }
-   
   });
 
   //for School URL Params
   app.get("/:schparams", (req, res) => {
     if (req.isAuthenticated()) {
-      console.log("PARAAAAAMS: " + req.params.schparams);
       res.redirect("/?page=profile");
     } else {
       req.params.schparams != "favicon.ico" &&
@@ -344,25 +345,24 @@ module.exports = (app, passport, modelSchool, db) => {
           req.body["n-password"],
           12
         );
-        modelSchool.findOneAndUpdate(
-          { schoolUrl: schurl },
-          doc,
-          (err, result) => {
-            if (err) {
-              console.log("findOneAndUpdate error");
-              res.send("Server Database Error");
-            } else if (!result) {
-              res.send("Failed To Change Password");
-            } else {
-              res.send("Change Password Successful <br><a href='/'>Back</a>");
-            }
+        doc.markModified("people." + member);
+        doc.save((err, result) => {
+          if (err) {
+            console.log("Database error");
+            res.send("Server Database Error");
+          } else if (!result) {
+            res.send("Failed To Change Password");
+          } else {
+            res.send("Change Password Successful <br><a href='/'>Back</a>");
           }
-        );
+        });
       } else {
         res.send("Change Password Failed");
       }
     });
   });
+
+  //Update Account (ADMIN ACCOUNTS ONLY)
   app.post("/update-account", (req, res) => {
     dbSearchSchool(res, req.user.schoolUrl, doc => {
       let ind = -1;
@@ -395,22 +395,19 @@ module.exports = (app, passport, modelSchool, db) => {
         toUpdate.permissions.manageAdminAccounts = !!req.body["admin-accounts"];
         toUpdate.position = req.body.position;
         doc.people.officials[ind] = toUpdate;
-        modelSchool.findOneAndUpdate(
-          { schoolUrl: req.user.schoolUrl },
-          doc,
-          (err, result) => {
-            if (err) {
-              console.log("Update error: " + err);
-              res.send("Server Update Error");
-            } else if (!result) {
-              console.log("Update Failed");
-              res.send("Server Update Failed");
-            } else {
-              const hash = bcrypt.hashSync("true", 1);
-              res.redirect("/?page=view-and-manage-admins&success=" + hash);
-            }
+        doc.markModified("people.officials");
+        doc.save((err, result) => {
+          if (err) {
+            console.log("Update error: " + err);
+            res.send("Server Update Error");
+          } else if (!result) {
+            console.log("Update Failed");
+            res.send("Server Update Failed");
+          } else {
+            const hash = bcrypt.hashSync("true", 1);
+            res.redirect("/?page=view-and-manage-admins&success=" + hash);
           }
-        );
+        });
       }
     });
   });
@@ -438,28 +435,36 @@ module.exports = (app, passport, modelSchool, db) => {
         hierarchy[req.user.position] <= hierarchy[toUpdate.position]
       ) {
         console.log("No permission to edit account");
-        res.redirect(
-          "/?page=view-and-manage-admins&error=Hey bro don't edit the source code :D"
-        );
+        const hash = bcrypt.hashSync("true", 1);
+        res.redirect("/?page=view-and-manage-admins&error=" + hash);
       } else {
         doc.people.officials.splice(ind, 1);
-        modelSchool.findOneAndUpdate(
-          { schoolUrl: req.user.schoolUrl },
-          doc,
-          (err, result) => {
-            if (err) {
-              console.log("Delete error: " + err);
-              res.send("Server Database Error");
-            } else if (!result) {
-              console.log("Delete Failed");
-              res.send("Server Database Failed");
-            } else {
-              res.redirect(
-                "/?page=view-and-manage-admins&success=Account Deletion Successful"
-              );
+        doc.markModified("people.officials");
+        doc.save((err, result) => {
+          if (err) {
+            console.log("Delete error: " + err);
+            res.send("Server Database Error");
+          } else if (!result) {
+            console.log("Delete Failed");
+            res.send("Server Database Failed");
+          } else {
+            const dir =
+              "./dist/img/users/" +
+              req.user.schoolUrl +
+              "/" +
+              req.body["idofaccount-to-delete"] +
+              ".jpg";
+
+            try {
+              fs.unlinkSync(dir);
+            } catch (e) {
+              console.log("Failed to delete file: " + dir);
             }
+
+            const hash = bcrypt.hashSync("delete", 1);
+            res.redirect("/?page=view-and-manage-admins&success=" + hash);
           }
-        );
+        });
       }
     });
   });
@@ -470,217 +475,77 @@ module.exports = (app, passport, modelSchool, db) => {
     );
   });
 
-  app.post("/register-master", (req, res) => {
-    const schurl = req.body["school-name"].toLowerCase().replace(/\s/g, "_");
-    modelSchool.findOne({ schoolUrl: schurl }, (err, doc) => {
-      if (err) {
-        console.log("Db 'findOne' Error: " + err);
-        res.status("500").send("Server error 500");
-      } else if (doc) {
-        renderPage(res, {
-          currentPage: "register",
-          errorDom: `School name "${req.body["school-name"]}" already exist`
-        });
-      } else {
-        const hash = bcrypt.hashSync(req.body.password, 12);
-        const uuid = uuidv4();
-        const schurl = req.body["school-name"]
-          .toLowerCase()
-          .replace(/\s/g, "_");
+  app.use(
+    "/register-master",
+    (req, res, next) => {
+      req.modelSchool = modelSchool;
+      req.renderPage = renderPage;
+      next();
+    },
+    ROUTER_registerMaster
+  );
 
-        //DATA STRUCTURE
-        //CHANGES SHOULD BE IN ACCORDANCE WITH SCHEMA AT SERVER.JS
-        const documentSchool = new modelSchool({
-          username: req.body.username,
-          password: hash,
-          schoolUrl: schurl,
-          ownerFirstName: req.body["first-name"],
-          ownerLastName: req.body["last-name"],
-          people: {
-            officials: [
-              {
-                id: "officials-" + uuid,
-                firstName: req.body["first-name"],
-                lastName: req.body["last-name"],
-                position: "President",
-                username: req.body.username,
-                password: hash,
-                schoolUrl: schurl,
-                schoolName: req.body["school-name"],
-                permissions: {
-                  manageSchedule: true,
-                  manageStudentsPayment: true,
-                  manageAdminAccounts: true
-                }
-              }
-            ],
-            students: {
-              BSCpE: {
-                I: {
-                  "Section-A": [
-                    {
-                      id: "",
-                      firstName: "Vincent",
-                      lastName: "Toledo",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    },
-                    {
-                      id: "",
-                      firstName: "Ally",
-                      lastName: "Mae",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    }
-                  ],
-                  "Section-B": [
-                    {
-                      id: "",
-                      firstName: "Ben",
-                      lastName: "Yow",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    },
-                    {
-                      id: "",
-                      firstName: "Danny",
-                      lastName: "Dan",
-                      username: "",
-                      password: "",
-                      schoolUrl: "",
-                      schoolName: "",
-                      subjects: []
-                    }
-                  ]
-                }
-              }
+  app.use(
+    "/register-admin",
+    (req, res, next) => {
+      req.modelSchool = modelSchool;
+      req.renderPage = renderPage;
+      next();
+    },
+    ROUTER_registerAdmin
+  );
+
+  // Uploading DP
+
+  app.post("/api/change-dp", function(req, res) {
+    console.log(req.files);
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res.status(400).send("No files were uploaded.");
+    }
+
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    let newDp = req.files.newDp;
+
+    const dir = "./dist/img/users/" + req.user.schoolUrl;
+
+    fs.mkdirSync(dir);
+
+    // Use the mv() method to place the file somewhere on your server
+    newDp.mv(
+      "./dist/img/users/" + req.user.schoolUrl + "/" + req.user.id + ".jpg",
+      function(err) {
+        if (err) return res.status(500).send(err);
+        console.log("File uploaded, updating database...");
+        dbSearchSchool(res, req.user.schoolUrl, doc => {
+          const member = req.user && req.user.id.split("-")[0];
+          let ind = -1;
+          const toUpdate = doc.people[member].filter((x, i) => {
+            if (x.id == req.user.id) {
+              ind = i;
+              return true;
             }
-          },
-          //FOR MAPPING PURPOSE ONLY
-          coursesYearSection: [
-            [
-              "BSCpE",
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C"]
-            ],
-            [
-              "BSEcE",
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"],
-              ["Section-A", "Section-B", "Section-C"],
-              ["Section-A", "Section-B", "Section-C", "Section-D"]
-            ]
-          ], //change everything to this. getter function
-          curriculum: {
-            Algebra: [2, ["BSCpE", "I"], ["BSEcE", "I"]],
-            Geometry: [3, ["BSCpE", "I"], ["BSEcE", "I"]],
-            Trigonometry: [1, ["BSCpE", "II"], ["BSEcE", "II"]]
-          },
-          schedule: {},
-          layout: {
-            schoolName: req.body["school-name"],
-            schoolUrl: schurl
-          }
-        });
-        documentSchool.save((err, doc) => {
-          if (err) {
-            console.log("Registration Error: " + err);
-            res.status("500").send("Database Error");
+            return false;
+          })[0];
+
+          if (!toUpdate) {
+            return res.status(400).send("User is not valid.");
           } else {
-            console.log("Registration Successful.");
-            renderPage(res, {
-              currentPage: "register",
-              successDom: "Success!"
+            toUpdate.img =
+              "/img/users/" + req.user.schoolUrl + "/" + req.user.id + ".jpg";
+
+            doc.people[member][ind] = toUpdate;
+            doc.markModified("people." + member);
+            doc.save((err, result) => {
+              if (err)
+                return res
+                  .status(500)
+                  .send("File saved but wasnt able to update DB");
+
+              res.redirect("/?page=profile");
             });
           }
         });
       }
-    });
-  });
-
-  app.post("/register-admin", (req, res) => {
-    const uuid = uuidv4();
-    modelSchool
-      .findOne({ schoolUrl: req.user.schoolUrl })
-      .select("people")
-      .exec((err, doc) => {
-        if (err) {
-          console.log("Database Error: " + err);
-          res.send("DATABASE ERROR");
-        } else if (!doc) {
-          console.log("Unexpected error: School name doesn't exist");
-          res.send("Server error");
-        } else {
-          const isExisting = doc.people.officials.filter(
-            x => x.username == req.body.username
-          )[0];
-          console.log("IS EXISTING?: " + isExisting);
-          if (isExisting) {
-            console.log("Email already exists.");
-            renderPage(res, {
-              currentPage: "create-admin",
-              errorDom: "Email already exists."
-            });
-          } else {
-            const ticket = "ticket-" + uuidv4();
-            doc.people.officials.push({
-              id: "officials-" + uuid,
-              firstName: req.body["first-name"],
-              lastName: req.body["last-name"],
-              position: req.body.position,
-              username: req.body.username,
-              password: ticket,
-              schoolUrl: req.user.schoolUrl,
-              schoolName: req.user.schoolName,
-              permissions: {
-                manageSchedule: !!req.body.sched,
-                manageStudentsPayment: !!req.body.payment,
-                manageAdminAccounts: !!req.body["admin-accounts"]
-              }
-            });
-            modelSchool.findOneAndUpdate(
-              { schoolUrl: req.user.schoolUrl },
-              doc,
-              (err, done) => {
-                if (err) {
-                  console.log("Error on findOneAndUpdate: " + err);
-                  res.send("Server Database Error");
-                } else {
-                  console.log(done);
-                  const ticketString =
-                    "<h4>Ticket code for " +
-                    req.body["first-name"] +
-                    " " +
-                    req.body["last-name"] +
-                    " has been generated" +
-                    "<br>Please keep this somewhere safe." +
-                    "<br>This can only be used once.<br><br>" +
-                    req.body.username +
-                    "|" +
-                    req.body.position +
-                    "<br>" +
-                    ticket +
-                    "</h4><a href='/'>Back</a>";
-
-                  res.send(ticketString);
-                }
-              }
-            );
-          }
-        }
-      });
+    );
   });
 };
