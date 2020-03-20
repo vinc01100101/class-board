@@ -10,17 +10,13 @@ html {
   -moz-box-sizing: inherit;
   box-sizing: inherit;
 }
-<<<<<<< HEAD
-
-=======
-#feel-free{
+#feel-free {
   position: fixed;
   background: rgba(0, 0, 0, 0.7);
 }
-a{
+a {
   color: yellow;
 }
->>>>>>> bcdf86b1670ddbc2ce09c3bb6f03cec925600dc8
 body {
   overflow-wrap: break-word;
   background-color: rgb(31, 31, 31);
@@ -236,12 +232,9 @@ hr {
   width: 100%;
   height: auto;
 }
-<<<<<<< HEAD
-=======
-#room-content-hide-at-first{
+#room-content-hide-at-first {
   display: none;
 }
->>>>>>> bcdf86b1670ddbc2ce09c3bb6f03cec925600dc8
 .tab-content #room-content {
   width: 100%;
   height: auto;

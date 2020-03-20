@@ -15,13 +15,8 @@ module.exports = () => {
         <div id="homepage">
           <h1>Welcome to ClassBoard!</h1>
 
-<<<<<<< HEAD
-          <p>Every registered school will have their own customizable page.</p>
-          <p>Navigate to your school using this url format: </p>
-=======
           <p>All registered campuses will have their own customizable page.</p>
           <p>Navigate to your school url using this format: </p>
->>>>>>> bcdf86b1670ddbc2ce09c3bb6f03cec925600dc8
           <p>
             <span style={{ color: "purple" }}>
               https://vince-class-board.glitch.me/
@@ -50,7 +45,6 @@ module.exports = () => {
           <div
             className="fb-like"
             data-href="https://vince-class-board.glitch.me/"
-            // data-href={process.env.TUNNEL}
             data-width="30"
             data-layout="box_count"
             data-action="like"
@@ -107,16 +101,6 @@ module.exports = () => {
     const listFeatures = [
       `Register a school. (register a school together with the Owner/President's
     account/email)`,
-<<<<<<< HEAD
-      `Log in an Admin Account or use a ticket of the newly created admin
-    account.`,
-      `Control Panel button.`,
-      `Create Admin Account.`,
-      `Manage Admin Accounts (hover mouse on ID's to edit accounts).`
-    ];
-
-    const listUpdates = [];
-=======
       `Control-Panel button.(Only visible to admins)`,
       `Create new admin account.`,
       `Log in an admin account or use a ticket of the newly created admin
@@ -138,7 +122,6 @@ module.exports = () => {
       `Assign subjects.`,
       `School news feed.`
     ];
->>>>>>> bcdf86b1670ddbc2ce09c3bb6f03cec925600dc8
     return (
       <div className="popup-background">
         <div className="popup-content" id="features">
@@ -148,8 +131,6 @@ module.exports = () => {
               <li key={i}>{x}</li>
             ))}
           </ol>
-<<<<<<< HEAD
-=======
 
           <h4>Future implementations:</h4>
           <ol id="future-updates">
@@ -157,7 +138,6 @@ module.exports = () => {
               <li key={i}>{x}</li>
             ))}
           </ol>
->>>>>>> bcdf86b1670ddbc2ce09c3bb6f03cec925600dc8
         </div>
         <button onClick={props.onC}>CLOSE</button>
       </div>
