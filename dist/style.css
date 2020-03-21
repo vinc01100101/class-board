@@ -243,12 +243,7 @@ hr {
   width: 100%;
   height: auto;
 }
-.tab-content #room-content #post-content #actual-posts-container {
-  overflow-y: scroll;
-  height: 390px;
-  width: 100%;
-  background-color: rgb(46, 46, 46);
-}
+
 #post-input {
   display: flex;
   flex-direction: column;
@@ -269,15 +264,64 @@ hr {
 #room-select {
   margin: 20px;
 }
+
+#actual-posts-container {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  height: 450px;
+  width: 100%;
+  background-color: rgb(46, 46, 46);
+}
+.postDiv {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(37, 37, 36);
+  margin: 10px;
+  padding: 20px 20px 0px 20px;
+}
 .dp {
   width: 100px;
   height: 100px;
 }
-.postDiv {
-  width: 100%;
-  background-color: rgb(90, 87, 83);
+.postHdr {
+  display: flex;
+  flex-direction: row;
+  height: 50px;
 }
 .postImg {
   width: 50px;
   height: 50px;
+  margin-right: 5px;
+}
+.postName,
+.postEmail,
+.postPosition {
+  text-align: left;
+}
+.postName {
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 20px;
+}
+.postPosition {
+  font-size: 15px;
+  line-height: 15px;
+}
+.postEmail {
+  font-size: 12px;
+  line-height: 12px;
+}
+.postBdy {
+  margin: 20px 20px 0px 20px;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.postPost {
+  white-space: pre-wrap;
+}
+.postDate {
+  font-size: 12px;
+  /* color: rgb(233, 236, 62) */
 }

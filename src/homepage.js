@@ -11,6 +11,7 @@ module.exports = () => {
       const domSchoolsTxt = JSON.parse(
         document.getElementById("schools").textContent
       );
+
       return (
         <div id="homepage">
           <h1>Welcome to ClassBoard!</h1>

@@ -6,7 +6,13 @@ module.exports = () => {
   const raw = JSON.parse(document.getElementById("courseList").textContent);
   const courseList = raw.map(x => x[0]);
   let courseDom, yrDom, sectionDom, enterDom, windowPath;
-
+  const positionColors = {
+    President: "rgb(231, 62, 217)",
+    "Vice President": "rgb(136, 81, 240)",
+    Dean: "rgb(102, 235, 41)",
+    Accountant: "rgb(25, 209, 209)",
+    Faculty: "rgb(233, 236, 62)"
+  };
   return class extends React.Component {
     constructor(props) {
       super(props);
@@ -19,7 +25,7 @@ module.exports = () => {
           cc2: "none"
         },
         postInput: "",
-        posts: []
+        postsState: {}
       };
       this._yrChange = this._yrChange.bind(this);
       this._courseChange = this._courseChange.bind(this);
@@ -49,7 +55,7 @@ module.exports = () => {
     }
     _emitsCallback(p) {
       this.setState({
-        posts: p
+        postsState: p
       });
     }
     _courseChange(e) {
@@ -137,12 +143,14 @@ module.exports = () => {
             >
               <h1>POSTS</h1>
               <div id="actual-posts-container">
-                {this.state.posts.length > 0 &&
-                  this.state.posts.map((x, i) => {
+                {this.state.postsState.posts &&
+                  this.state.postsState.posts.map((x, i) => {
                     const date = new Date(x.date);
+                    //get the poster info from this.state.postsState.reference object
+                    const reference = this.state.postsState.reference[x.id];
                     return (
                       <div className="postDiv" key={i}>
-                        <div>
+                        <div className="postHdr">
                           <img
                             className="postImg"
                             src={
@@ -154,22 +162,34 @@ module.exports = () => {
                               ".jpg"
                             }
                             onError={e => {
+                              //if profile picture not found on db
                               console.log("ONERROR");
                               e.target.onError = null;
                               e.target.src = windowPath + "/img/default.jpg";
                             }}
                           ></img>
-
-                          <div className="postName">{x.name}</div>
+                          <div>
+                            <div className="postName">{reference.name}</div>
+                            <div
+                              className="postPosition"
+                              style={{
+                                color: positionColors[reference.position]
+                              }}
+                            >
+                              {reference.position}
+                            </div>
+                            <div className="postEmail">{reference.email}</div>
+                          </div>
                         </div>
-
-                        <p className="postDate">
-                          {date.toDateString() +
-                            "|" +
-                            date.toLocaleTimeString()}
-                        </p>
-
-                        <p className="postPost">{x.post}</p>
+                        <div className="postBdy">
+                          <div className="postPost">{x.post}</div>
+                          <p className="postDate">
+                            {"Date posted: " +
+                              date.toDateString() +
+                              "|" +
+                              date.toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}

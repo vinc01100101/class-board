@@ -399,7 +399,7 @@ module.exports = (app, passport, modelSchool, db) => {
         doc.save((err, result) => {
           if (err) {
             console.log("Update error: " + err);
-            res.send("Server Update Error");
+            res.status(500).send("Server Update Error");
           } else if (!result) {
             console.log("Update Failed");
             res.send("Server Update Failed");
@@ -547,5 +547,9 @@ module.exports = (app, passport, modelSchool, db) => {
         });
       }
     );
+  });
+
+  app.get("/api/name", (req, res) => {
+    res.send("YOUR NAME");
   });
 };
